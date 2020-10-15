@@ -127,7 +127,10 @@ def create_link(accession, file_table_data, selected_table_data):
     url_provenance = dbc.Button("Visualize Files", block=True, color="primary", className="mr-1")
     provenance_link_object = dcc.Link(url_provenance, href="https://gnps-lcms.ucsd.edu/?" + urllib.parse.urlencode(url_params) , target="_blank")
 
-    return [provenance_link_object]
+    # Selection Text
+    selection_text = "Selected {} Files for LCMS Analysis".format(len(usi_list))
+
+    return [[html.Hr(), selection_text, html.Br(), html.Br(), provenance_link_object]]
 
 # This function will rerun at any time that the selection is updated for column
 @app.callback(
