@@ -62,6 +62,29 @@ DASHBOARD = [
             html.H3(children='GNPS/Metabolights Dataset Accession'),
             dbc.Input(className="mb-3", id='dataset_accession', placeholder="Enter Dataset ID"),
             html.Br(),
+            dbc.Row([
+                dbc.Col(
+                    dbc.FormGroup(
+                        [
+                            dbc.Label("Metadata Source", width=4.8, style={"width":"150px"}),
+                            dcc.Dropdown(
+                                id='metadata_source',
+                                options=[
+                                    {'label': 'REDU', 'value': 'REDU'},
+                                    {'label': 'MASSIVE', 'value': 'MASSIVE'}
+                                ],
+                                searchable=False,
+                                clearable=False,
+                                value="REDU",
+                                style={
+                                    "width":"60%"
+                                }
+                            )
+                        ],
+                        row=True,
+                        className="mb-3",
+                    )),
+            ]),
             
             html.H3(children='File List'),
             dash_table.DataTable(
@@ -178,13 +201,45 @@ def _add_redu_metadata(files_df, accession):
 
     return files_df
 
+def _add_massive_metadata(files_df, accession):
+    try:
+        # Getting massive task from accession
+        dataset_information = requests.get("https://massive.ucsd.edu/ProteoSAFe/MassiveServlet?function=massiveinformation&massiveid={}&_=1601057558273".format(accession)).json()
+        dataset_task = dataset_information["task"]
+
+        url = "https://massive.ucsd.edu/ProteoSAFe/result_json.jsp?task={}&view=view_metadata_list".format(dataset_task)
+        metadata_list = requests.get("https://massive.ucsd.edu/ProteoSAFe/result_json.jsp?task={}&view=view_metadata_list".format(dataset_task)).json()["blockData"]
+        if len(metadata_list) == 0:
+            return files_df
+        
+        metadata_filename = metadata_list[0]["File_descriptor"]
+        ftp_url = "ftp://massive.ucsd.edu/{}".format(metadata_filename.replace("f.", ""))
+
+        metadata_df = pd.read_csv(ftp_url, sep=None)
+
+        files_df["fullfilename"] = files_df["filename"]
+        files_df["filename"] = files_df["filename"].apply(lambda x: os.path.basename(x))
+        files_df = files_df.merge(metadata_df, how="left", on="filename")
+
+        files_df["filename"] = files_df["fullfilename"]
+        files_df = files_df.drop("fullfilename", axis=1)
+
+        print(metadata_df)
+        print(files_df)
+    except:
+        raise
+
+    return files_df
+
+    
+
 
 # This function will rerun at any time that the selection is updated for column
 @app.callback(
     [Output('file-table', 'data'), Output('file-table', 'columns')],
-    [Input('dataset_accession', 'value')],
+    [Input('dataset_accession', 'value'), Input("metadata_source", "value")],
 )
-def list_files(accession):
+def list_files(accession, metadata_source):
     columns = [{"name": "filename", "id": "filename"}]
     if "MSV" in accession:
         all_files = _get_massive_files(accession)
@@ -193,7 +248,10 @@ def list_files(accession):
         files_df = pd.DataFrame()
         files_df["filename"] = all_files
 
-        files_df = _add_redu_metadata(files_df, accession)
+        if metadata_source == "REDU":
+            files_df = _add_redu_metadata(files_df, accession)
+        elif metadata_source == "MASSIVE":
+            files_df = _add_massive_metadata(files_df, accession)
 
         columns = [{"name": column, "id": column} for column in files_df.columns]
 
