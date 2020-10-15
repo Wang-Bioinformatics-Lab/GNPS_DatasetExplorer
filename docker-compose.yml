@@ -1,0 +1,22 @@
+version: '3'
+services:
+  gnpsfbmngroupsselector-dash:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gnpsfbmngroupsselector-dash
+    volumes:
+      - ./logs:/app/logs:rw
+    ports:
+    - "5854:5000"
+    networks:
+      - default
+      - nginx-net
+    restart: unless-stopped
+    command: /app/run_server.sh
+
+
+networks:
+  nginx-net:
+    external:
+      name: nginx-net
