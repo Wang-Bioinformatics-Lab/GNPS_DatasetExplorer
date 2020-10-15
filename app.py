@@ -227,7 +227,7 @@ def _add_massive_metadata(files_df, accession):
         print(metadata_df)
         print(files_df)
     except:
-        raise
+        pass
 
     return files_df
 
