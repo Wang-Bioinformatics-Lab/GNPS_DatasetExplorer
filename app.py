@@ -15,11 +15,23 @@ import pandas as pd
 import requests
 import uuid
 import dash_table
+from flask_caching import Cache
+
 
 
 server = Flask(__name__)
 app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app.title = 'GNPS - Dataset Browser'
+cache = Cache(app.server, config={
+    #'CACHE_TYPE': "null",
+    'CACHE_TYPE': 'filesystem',
+    'CACHE_DIR': 'temp/flask-cache',
+    'CACHE_DEFAULT_TIMEOUT': 0,
+    'CACHE_THRESHOLD': 1000000
+})
 server = app.server
+
+
 
 NAVBAR = dbc.Navbar(
     children=[
@@ -89,6 +101,7 @@ def determine_task(pathname):
     if pathname is not None and len(pathname) > 1:
         return pathname[1:]
     else:
+        return "MSV000086206"
         return "MTBLS1842"
 
 
@@ -132,6 +145,29 @@ def create_link(accession, file_table_data, selected_table_data):
 
     return [[html.Br(), html.Hr(), selection_text, html.Br(), html.Br(), provenance_link_object]]
 
+
+@cache.memoize()
+def _get_massive_files(dataset_accession):
+    import ftputil
+    import ming_proteosafe_library
+
+    massive_host = ftputil.FTPHost("massive.ucsd.edu", "anonymous", "")
+
+    all_files = ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "ccms_peak", massive_host=massive_host)
+    all_files += ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "peak", massive_host=massive_host)
+
+    return all_files
+
+@cache.memoize()
+def _get_mtbls_files(dataset_accession):
+    url = "https://www.ebi.ac.uk:443/metabolights/ws/studies/{}/files?include_raw_data=true".format(dataset_accession)
+    r = requests.get(url)
+    all_files = r.json()["study"]
+    all_files = [file_obj for file_obj in all_files if file_obj["directory"] is False]
+    all_files = [file_obj for file_obj in all_files if file_obj["type"] == "derived" ]
+    
+    return all_files
+
 # This function will rerun at any time that the selection is updated for column
 @app.callback(
     [Output('file-table', 'data')],
@@ -139,15 +175,16 @@ def create_link(accession, file_table_data, selected_table_data):
 )
 def list_files(accession):
     if "MSV" in accession:
-        # TODO: Implement it for MassIVE
-        return [[{"filename": "X"}]]
-    if "MTBLS" in accession:
-        url = "https://www.ebi.ac.uk:443/metabolights/ws/studies/{}/files?include_raw_data=true".format(accession)
-        r = requests.get(url)
-        all_files = r.json()["study"]
-        all_files = [file_obj for file_obj in all_files if file_obj["directory"] is False]
-        all_files = [file_obj for file_obj in all_files if file_obj["type"] == "derived" ]
+        all_files = _get_massive_files(accession)
+        all_files = [filename.replace(accession + "/", "") for filename in all_files]
 
+        files_df = pd.DataFrame()
+        files_df["filename"] = all_files
+
+        print(all_files)
+        return [files_df.to_dict(orient="records")]
+    if "MTBLS" in accession:
+        all_files = _get_mtbls_files(accession)
         temp_df = pd.DataFrame(all_files)
         files_df = pd.DataFrame()
         files_df["filename"] = temp_df["file"]
