@@ -69,7 +69,7 @@ DASHBOARD = [
                 columns=[{"name": "filename", "id": "filename"}],
                 data=[],
                 row_selectable='multi',
-                page_size= 10,
+                page_size= 20,
                 filter_action="native",
             ),
             html.Br(),
@@ -168,12 +168,24 @@ def _get_mtbls_files(dataset_accession):
     
     return all_files
 
+def _add_redu_metadata(files_df, accession):
+    redu_metadata = pd.read_csv("https://redu.ucsd.edu/dump", sep='\t')
+    files_df["filename"] = "f." + accession + "/" + files_df["filename"]
+    files_df = files_df.merge(redu_metadata, how="left", on="filename")
+    files_df = files_df[["filename", "MassSpectrometer", "SampleType", "SampleTypeSub1"]]
+    files_df["filename"] = files_df["filename"].apply(lambda x: x.replace("f.{}/".format(accession), ""))
+    print(files_df.head())
+
+    return files_df
+
+
 # This function will rerun at any time that the selection is updated for column
 @app.callback(
-    [Output('file-table', 'data')],
+    [Output('file-table', 'data'), Output('file-table', 'columns')],
     [Input('dataset_accession', 'value')],
 )
 def list_files(accession):
+    columns = [{"name": "filename", "id": "filename"}]
     if "MSV" in accession:
         all_files = _get_massive_files(accession)
         all_files = [filename.replace(accession + "/", "") for filename in all_files]
@@ -181,16 +193,19 @@ def list_files(accession):
         files_df = pd.DataFrame()
         files_df["filename"] = all_files
 
-        print(all_files)
-        return [files_df.to_dict(orient="records")]
+        files_df = _add_redu_metadata(files_df, accession)
+
+        columns = [{"name": column, "id": column} for column in files_df.columns]
+
+        return [files_df.to_dict(orient="records"), columns]
     if "MTBLS" in accession:
         all_files = _get_mtbls_files(accession)
         temp_df = pd.DataFrame(all_files)
         files_df = pd.DataFrame()
         files_df["filename"] = temp_df["file"]
 
-        return [files_df.to_dict(orient="records")]
-    return [[{"filename": "X"}]]
+        return [files_df.to_dict(orient="records"), columns]
+    return [[{"filename": "X"}], columns]
 
 
 
