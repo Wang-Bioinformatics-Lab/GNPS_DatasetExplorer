@@ -130,7 +130,7 @@ def create_link(accession, file_table_data, selected_table_data):
     # Selection Text
     selection_text = "Selected {} Files for LCMS Analysis".format(len(usi_list))
 
-    return [[html.Hr(), selection_text, html.Br(), html.Br(), provenance_link_object]]
+    return [[html.Br(), html.Hr(), selection_text, html.Br(), html.Br(), provenance_link_object]]
 
 # This function will rerun at any time that the selection is updated for column
 @app.callback(
@@ -139,6 +139,7 @@ def create_link(accession, file_table_data, selected_table_data):
 )
 def list_files(accession):
     if "MSV" in accession:
+        # TODO: Implement it for MassIVE
         return [[{"filename": "X"}]]
     if "MTBLS" in accession:
         url = "https://www.ebi.ac.uk:443/metabolights/ws/studies/{}/files?include_raw_data=true".format(accession)
