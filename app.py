@@ -94,6 +94,7 @@ DASHBOARD = [
                 row_selectable='multi',
                 page_size= 20,
                 filter_action="native",
+                export_format="xlsx"
             ),
             html.Br(),
             dcc.Loading(
