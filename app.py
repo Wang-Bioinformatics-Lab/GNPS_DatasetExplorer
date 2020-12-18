@@ -99,17 +99,34 @@ DASHBOARD = [
 
             html.Hr(),
             
-            html.H3(children='File List'),
+            html.H3(children='Default File Selection List'),
+            html.Hr(),
             dash_table.DataTable(
                 id='file-table',
                 columns=[{"name": "filename", "id": "filename"}],
                 data=[],
                 row_selectable='multi',
-                page_size= 20,
+                page_size= 10,
                 filter_action="native",
                 export_format="xlsx"
             ),
             html.Br(),
+            html.Br(),
+
+            html.H3(children='Comparison File Selection List (Optional)'),
+            html.Hr(),
+            dash_table.DataTable(
+                id='file-table2',
+                columns=[{"name": "filename", "id": "filename"}],
+                data=[],
+                row_selectable='multi',
+                page_size= 10,
+                filter_action="native",
+                export_format="xlsx"
+            ),
+            html.Br(),
+
+
             dcc.Loading(
                 id="link-button",
                 children=[html.Div([html.Div(id="loading-output-9")])],
@@ -171,27 +188,38 @@ def _get_group_usi_string(gnps_task, metadata_column, metadata_term):
 
     return usi_string
 
-@app.callback([Output('link-button', 'children')],
-              [Input('dataset_accession', 'value'), 
-              Input('file-table', 'derived_virtual_data'),
-              Input('file-table', 'derived_virtual_selected_rows')])
-def create_link(accession, file_table_data, selected_table_data):
+def _determine_usi_list(accession, file_table_data, selected_table_data):
     usi_list = []
     for selected_index in selected_table_data:
         filename = file_table_data[selected_index]["filename"]
         usi = "mzspec:{}:{}".format(accession, filename)
         usi_list.append(usi)
 
-    usi_string1 = "\n".join(usi_list)
+    return usi_list
+
+@app.callback([Output('link-button', 'children')],
+              [Input('dataset_accession', 'value'), 
+              Input('file-table', 'derived_virtual_data'),
+              Input('file-table', 'derived_virtual_selected_rows'),
+              Input('file-table2', 'derived_virtual_data'),
+              Input('file-table2', 'derived_virtual_selected_rows'),
+              ])
+def create_link(accession, file_table_data, selected_table_data, file_table_data2, selected_table_data2):
+    usi_list1 = _determine_usi_list(accession, file_table_data, selected_table_data)
+    usi_list2 = _determine_usi_list(accession, file_table_data2, selected_table_data2)
+
+    usi_string1 = "\n".join(usi_list1)
+    usi_string2 = "\n".join(usi_list2)
 
     url_params = {}
     url_params["usi"] = usi_string1
+    url_params["usi2"] = usi_string2
 
     url_provenance = dbc.Button("Visualize Files", block=True, color="primary", className="mr-1")
     provenance_link_object = dcc.Link(url_provenance, href="https://gnps-lcms.ucsd.edu/?" + urllib.parse.urlencode(url_params) , target="_blank")
 
     # Selection Text
-    selection_text = "Selected {} Files for LCMS Analysis".format(len(usi_list))
+    selection_text = "Selected {} Default Files and {} Comparison Files for LCMS Analysis".format(len(usi_list1), len(usi_list2))
 
     return [[html.Br(), html.Hr(), selection_text, html.Br(), html.Br(), provenance_link_object]]
 
@@ -284,7 +312,7 @@ def _add_massive_metadata(files_df, accession):
 
 # This function will rerun at any time that the selection is updated for column
 @app.callback(
-    [Output('file-table', 'data'), Output('file-table', 'columns')],
+    [Output('file-table', 'data'), Output('file-table', 'columns'), Output('file-table2', 'data'), Output('file-table2', 'columns')],
     [Input('dataset_accession', 'value'), Input("metadata_source", "value")],
 )
 def list_files(accession, metadata_source):
@@ -306,15 +334,17 @@ def list_files(accession, metadata_source):
 
         columns = [{"name": column, "id": column} for column in files_df.columns]
 
-        return [files_df.to_dict(orient="records"), columns]
+        return [files_df.to_dict(orient="records"), columns, files_df.to_dict(orient="records"), columns]
+
     if "MTBLS" in accession:
         all_files = _get_mtbls_files(accession)
         temp_df = pd.DataFrame(all_files)
         files_df = pd.DataFrame()
         files_df["filename"] = temp_df["file"]
 
-        return [files_df.to_dict(orient="records"), columns]
-    return [[{"filename": "X"}], columns]
+        return [files_df.to_dict(orient="records"), columns, files_df.to_dict(orient="records"), columns]
+
+    return [[{"filename": "X"}], columns, [{"filename": "X"}], columns]
 
 # This function will rerun at any time that the selection is updated for column
 @app.callback(
