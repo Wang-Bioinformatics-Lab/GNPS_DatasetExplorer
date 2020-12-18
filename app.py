@@ -51,16 +51,18 @@ NAVBAR = dbc.Navbar(
 )
 
 DASHBOARD = [
-    dbc.CardHeader(html.H5("GNPS Dataset Dashboard")),
+    dbc.CardHeader(html.H5("GNPS Dataset Dashboard - Version - 0.1")),
     dbc.CardBody(
         [   
             dcc.Location(id='url', refresh=False),
-
-            html.Div(id='version', children="Version - 0.1"),
-
             html.Br(),
-            html.H3(children='GNPS/Metabolights Dataset Accession'),
-            dbc.Input(className="mb-3", id='dataset_accession', placeholder="Enter Dataset ID"),
+            dbc.InputGroup(
+                [
+                    dbc.InputGroupAddon("GNPS/Metabolights Dataset Accession", addon_type="prepend"),
+                    dbc.Input(id='dataset_accession', placeholder="Enter Dataset ID"),
+                ],
+                className="mb-3",
+            ),
             html.Br(),
             dbc.Row([
                 dbc.Col(
@@ -77,14 +79,25 @@ DASHBOARD = [
                                 clearable=False,
                                 value="REDU",
                                 style={
-                                    "width":"60%"
+                                    "width":"60%",
                                 }
                             )
                         ],
                         row=True,
                         className="mb-3",
-                    )),
+                    ),
+                    style={
+                            "left":"20px",
+                        }
+                    ),
             ]),
+            html.Hr(),
+
+            html.H3(children="Dataset Title Placeholder", id='dataset-title'),
+            html.Hr(),
+            html.Div(children="Dataset details", id='dataset-details'),
+
+            html.Hr(),
             
             html.H3(children='File List'),
             dash_table.DataTable(
@@ -101,14 +114,30 @@ DASHBOARD = [
                 id="link-button",
                 children=[html.Div([html.Div(id="loading-output-9")])],
                 type="default",
-            )
+            ),
+
+            html.Hr(),
+
+            html.H3(children="Example Datasets"),
+            html.Hr(),
+
+            html.A("MassIVE Dataset with mzML Files", href="/MSV000086206"),
+            html.Br(),
+            html.A("MassIVE Dataset with CDF Files", href="/MSV000086521"),
+            html.Br(),
+            html.A("Metabolights Dataset", href="/MTBLS1842"),
+
         ]
     )
 ]
 
 BODY = dbc.Container(
     [
-        dbc.Row([dbc.Col(dbc.Card(DASHBOARD)),], style={"marginTop": 30}),
+        dbc.Row([
+            dbc.Col(
+                dbc.Card(DASHBOARD)
+            ),
+        ], style={"marginTop": 30}),
     ],
     className="mt-12",
 )
@@ -137,7 +166,7 @@ def _get_group_usi_string(gnps_task, metadata_column, metadata_term):
     merged_df = metadata_df.merge(filesummary_df, how="left", on="filename")
 
     file_list = list(merged_df[merged_df[metadata_column] == metadata_term]["full_CCMS_path"])
-    usi_list = ["mzspec:GNPS:TASK-{}-f.{}:scan:1".format(gnps_task, filename) for filename in file_list]
+    usi_list = ["mzspec:GNPS:TASK-{}-f.{}".format(gnps_task, filename) for filename in file_list]
     usi_string = "\n".join(usi_list)
 
     return usi_string
@@ -147,14 +176,11 @@ def _get_group_usi_string(gnps_task, metadata_column, metadata_term):
               Input('file-table', 'derived_virtual_data'),
               Input('file-table', 'derived_virtual_selected_rows')])
 def create_link(accession, file_table_data, selected_table_data):
-    print(len(file_table_data), selected_table_data)
-
     usi_list = []
     for selected_index in selected_table_data:
         filename = file_table_data[selected_index]["filename"]
-        usi = "mzspec:{}:{}:scan:1".format(accession, filename)
+        usi = "mzspec:{}:{}".format(accession, filename)
         usi_list.append(usi)
-        print(file_table_data[selected_index])
 
     usi_string1 = "\n".join(usi_list)
 
@@ -179,8 +205,21 @@ def _get_massive_files(dataset_accession):
 
     all_files = ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "ccms_peak", massive_host=massive_host)
     all_files += ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "peak", massive_host=massive_host)
+    all_files += ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "raw", massive_host=massive_host)
+
+    acceptable_extensions = [".mzml", ".mzxml", ".cdf"]
+
+    all_files = [filename for filename in all_files if os.path.splitext(filename)[1].lower() in acceptable_extensions]
 
     return all_files
+
+@cache.memoize()
+def _get_massive_dataset_information(dataset_accession):
+    url = "http://massive.ucsd.edu/ProteoSAFe/proxi/v0.1/datasets/{}".format(dataset_accession)
+    r = requests.get(url)
+    dataset_information = r.json()
+
+    return dataset_information["title"], dataset_information["summary"]
 
 @cache.memoize()
 def _get_mtbls_files(dataset_accession):
@@ -192,13 +231,24 @@ def _get_mtbls_files(dataset_accession):
     
     return all_files
 
+@cache.memoize()
+def _get_mtbls_dataset_information(dataset_accession):
+    url = "https://www.ebi.ac.uk/metabolights/ws/studies/{}/description".format(dataset_accession)
+    r = requests.get(url)
+    description = r.json()["description"]
+
+    url = "https://www.ebi.ac.uk/metabolights/ws/studies/{}/title".format(dataset_accession)
+    r = requests.get(url)
+    title = r.json()["title"]
+     
+    return title, description
+
 def _add_redu_metadata(files_df, accession):
     redu_metadata = pd.read_csv("https://redu.ucsd.edu/dump", sep='\t')
     files_df["filename"] = "f." + accession + "/" + files_df["filename"]
     files_df = files_df.merge(redu_metadata, how="left", on="filename")
     files_df = files_df[["filename", "MassSpectrometer", "SampleType", "SampleTypeSub1"]]
     files_df["filename"] = files_df["filename"].apply(lambda x: x.replace("f.{}/".format(accession), ""))
-    print(files_df.head())
 
     return files_df
 
@@ -224,9 +274,6 @@ def _add_massive_metadata(files_df, accession):
 
         files_df["filename"] = files_df["fullfilename"]
         files_df = files_df.drop("fullfilename", axis=1)
-
-        print(metadata_df)
-        print(files_df)
     except:
         pass
 
@@ -244,6 +291,9 @@ def list_files(accession, metadata_source):
     columns = [{"name": "filename", "id": "filename"}]
     if "MSV" in accession:
         all_files = _get_massive_files(accession)
+
+        print(all_files)
+
         all_files = [filename.replace(accession + "/", "") for filename in all_files]
 
         files_df = pd.DataFrame()
@@ -266,6 +316,23 @@ def list_files(accession, metadata_source):
         return [files_df.to_dict(orient="records"), columns]
     return [[{"filename": "X"}], columns]
 
+# This function will rerun at any time that the selection is updated for column
+@app.callback(
+    [Output('dataset-title', 'children'), Output('dataset-details', 'children')],
+    [Input('dataset_accession', 'value')],
+)
+def dataset_information(accession):
+    dataset_title = "Dataset Title - Error"
+    dataset_description = "Error Description"
+
+    if "MSV" in accession:
+        dataset_title, dataset_description = _get_massive_dataset_information(accession)
+
+    if "MTBLS" in accession:
+        dataset_title, dataset_description = _get_mtbls_dataset_information(accession)
+
+
+    return [dataset_title, dataset_description]
 
 
 if __name__ == "__main__":

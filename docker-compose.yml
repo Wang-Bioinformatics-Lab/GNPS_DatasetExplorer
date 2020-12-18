@@ -1,10 +1,10 @@
 version: '3'
 services:
-  gnpsfbmngroupsselector-dash:
+  gnpsdatasetchooser-dash:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: gnpsfbmngroupsselector-dash
+    container_name: gnpsdatasetchooser-dash
     volumes:
       - ./logs:/app/logs:rw
     ports:
