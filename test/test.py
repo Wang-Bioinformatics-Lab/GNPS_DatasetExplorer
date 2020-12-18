@@ -12,6 +12,7 @@ def test_mtbls():
     print(utils.get_dataset_files(accession, "REDU"))
 
 def test_pride():
-    accession = "PXD005011"
-    print(utils.get_dataset_files(accession, "REDU"))
-    print(utils.get_dataset_description(accession))
+    accessions = ["PXD005011", "PXD001726"]
+    for accession in accessions:
+        utils.get_dataset_files(accession, "REDU")
+        utils.get_dataset_description(accession)

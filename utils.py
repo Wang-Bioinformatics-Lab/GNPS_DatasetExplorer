@@ -124,8 +124,7 @@ def _get_pxd_files(dataset_accession):
         if extension in acceptable_extensions:
             output_dict = {}
             output_dict["filename"] = os.path.basename(remote_path)
-
-        output_list.append(output_dict)
+            output_list.append(output_dict)
     
     return output_list
 
