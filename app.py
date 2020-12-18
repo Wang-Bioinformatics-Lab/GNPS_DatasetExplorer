@@ -17,14 +17,14 @@ import uuid
 import dash_table
 from flask_caching import Cache
 
-
+import utils
 
 server = Flask(__name__)
 app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = 'GNPS - Dataset Browser'
 cache = Cache(app.server, config={
-    #'CACHE_TYPE': "null",
-    'CACHE_TYPE': 'filesystem',
+    'CACHE_TYPE': "null",
+    #'CACHE_TYPE': 'filesystem',
     'CACHE_DIR': 'temp/flask-cache',
     'CACHE_DEFAULT_TIMEOUT': 0,
     'CACHE_THRESHOLD': 1000000
@@ -58,7 +58,7 @@ DASHBOARD = [
             html.Br(),
             dbc.InputGroup(
                 [
-                    dbc.InputGroupAddon("GNPS/Metabolights Dataset Accession", addon_type="prepend"),
+                    dbc.InputGroupAddon("GNPS/Metabolights/PX Dataset Accession", addon_type="prepend"),
                     dbc.Input(id='dataset_accession', placeholder="Enter Dataset ID"),
                 ],
                 className="mb-3",
@@ -143,6 +143,8 @@ DASHBOARD = [
             html.A("MassIVE Dataset with CDF Files", href="/MSV000086521"),
             html.Br(),
             html.A("Metabolights Dataset", href="/MTBLS1842"),
+            html.Br(),
+            html.A("ProteoXchange Dataset", href="/PXD005011"),
 
         ]
     )
@@ -223,92 +225,13 @@ def create_link(accession, file_table_data, selected_table_data, file_table_data
 
     return [[html.Br(), html.Hr(), selection_text, html.Br(), html.Br(), provenance_link_object]]
 
+@cache.memoize()
+def _get_dataset_files(accession, metadata_source):
+    return utils.get_dataset_files(accession, metadata_source)
 
 @cache.memoize()
-def _get_massive_files(dataset_accession):
-    import ftputil
-    import ming_proteosafe_library
-
-    massive_host = ftputil.FTPHost("massive.ucsd.edu", "anonymous", "")
-
-    all_files = ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "ccms_peak", massive_host=massive_host)
-    all_files += ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "peak", massive_host=massive_host)
-    all_files += ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "raw", massive_host=massive_host)
-
-    acceptable_extensions = [".mzml", ".mzxml", ".cdf"]
-
-    all_files = [filename for filename in all_files if os.path.splitext(filename)[1].lower() in acceptable_extensions]
-
-    return all_files
-
-@cache.memoize()
-def _get_massive_dataset_information(dataset_accession):
-    url = "http://massive.ucsd.edu/ProteoSAFe/proxi/v0.1/datasets/{}".format(dataset_accession)
-    r = requests.get(url)
-    dataset_information = r.json()
-
-    return dataset_information["title"], dataset_information["summary"]
-
-@cache.memoize()
-def _get_mtbls_files(dataset_accession):
-    url = "https://www.ebi.ac.uk:443/metabolights/ws/studies/{}/files?include_raw_data=true".format(dataset_accession)
-    r = requests.get(url)
-    all_files = r.json()["study"]
-    all_files = [file_obj for file_obj in all_files if file_obj["directory"] is False]
-    all_files = [file_obj for file_obj in all_files if file_obj["type"] == "derived" ]
-    
-    return all_files
-
-@cache.memoize()
-def _get_mtbls_dataset_information(dataset_accession):
-    url = "https://www.ebi.ac.uk/metabolights/ws/studies/{}/description".format(dataset_accession)
-    r = requests.get(url)
-    description = r.json()["description"]
-
-    url = "https://www.ebi.ac.uk/metabolights/ws/studies/{}/title".format(dataset_accession)
-    r = requests.get(url)
-    title = r.json()["title"]
-     
-    return title, description
-
-def _add_redu_metadata(files_df, accession):
-    redu_metadata = pd.read_csv("https://redu.ucsd.edu/dump", sep='\t')
-    files_df["filename"] = "f." + accession + "/" + files_df["filename"]
-    files_df = files_df.merge(redu_metadata, how="left", on="filename")
-    files_df = files_df[["filename", "MassSpectrometer", "SampleType", "SampleTypeSub1"]]
-    files_df["filename"] = files_df["filename"].apply(lambda x: x.replace("f.{}/".format(accession), ""))
-
-    return files_df
-
-def _add_massive_metadata(files_df, accession):
-    try:
-        # Getting massive task from accession
-        dataset_information = requests.get("https://massive.ucsd.edu/ProteoSAFe/MassiveServlet?function=massiveinformation&massiveid={}&_=1601057558273".format(accession)).json()
-        dataset_task = dataset_information["task"]
-
-        url = "https://massive.ucsd.edu/ProteoSAFe/result_json.jsp?task={}&view=view_metadata_list".format(dataset_task)
-        metadata_list = requests.get("https://massive.ucsd.edu/ProteoSAFe/result_json.jsp?task={}&view=view_metadata_list".format(dataset_task)).json()["blockData"]
-        if len(metadata_list) == 0:
-            return files_df
-        
-        metadata_filename = metadata_list[0]["File_descriptor"]
-        ftp_url = "ftp://massive.ucsd.edu/{}".format(metadata_filename.replace("f.", ""))
-
-        metadata_df = pd.read_csv(ftp_url, sep=None)
-
-        files_df["fullfilename"] = files_df["filename"]
-        files_df["filename"] = files_df["filename"].apply(lambda x: os.path.basename(x))
-        files_df = files_df.merge(metadata_df, how="left", on="filename")
-
-        files_df["filename"] = files_df["fullfilename"]
-        files_df = files_df.drop("fullfilename", axis=1)
-    except:
-        pass
-
-    return files_df
-
-    
-
+def _get_dataset_description(accession):
+    return utils.get_dataset_description(accession)
 
 # This function will rerun at any time that the selection is updated for column
 @app.callback(
@@ -317,34 +240,9 @@ def _add_massive_metadata(files_df, accession):
 )
 def list_files(accession, metadata_source):
     columns = [{"name": "filename", "id": "filename"}]
-    if "MSV" in accession:
-        all_files = _get_massive_files(accession)
+    files_df = _get_dataset_files(accession, metadata_source)
 
-        print(all_files)
-
-        all_files = [filename.replace(accession + "/", "") for filename in all_files]
-
-        files_df = pd.DataFrame()
-        files_df["filename"] = all_files
-
-        if metadata_source == "REDU":
-            files_df = _add_redu_metadata(files_df, accession)
-        elif metadata_source == "MASSIVE":
-            files_df = _add_massive_metadata(files_df, accession)
-
-        columns = [{"name": column, "id": column} for column in files_df.columns]
-
-        return [files_df.to_dict(orient="records"), columns, files_df.to_dict(orient="records"), columns]
-
-    if "MTBLS" in accession:
-        all_files = _get_mtbls_files(accession)
-        temp_df = pd.DataFrame(all_files)
-        files_df = pd.DataFrame()
-        files_df["filename"] = temp_df["file"]
-
-        return [files_df.to_dict(orient="records"), columns, files_df.to_dict(orient="records"), columns]
-
-    return [[{"filename": "X"}], columns, [{"filename": "X"}], columns]
+    return [files_df.to_dict(orient="records"), columns, files_df.to_dict(orient="records"), columns]
 
 # This function will rerun at any time that the selection is updated for column
 @app.callback(
@@ -352,15 +250,7 @@ def list_files(accession, metadata_source):
     [Input('dataset_accession', 'value')],
 )
 def dataset_information(accession):
-    dataset_title = "Dataset Title - Error"
-    dataset_description = "Error Description"
-
-    if "MSV" in accession:
-        dataset_title, dataset_description = _get_massive_dataset_information(accession)
-
-    if "MTBLS" in accession:
-        dataset_title, dataset_description = _get_mtbls_dataset_information(accession)
-
+    dataset_title, dataset_description = _get_dataset_description(accession)
 
     return [dataset_title, dataset_description]
 
