@@ -76,7 +76,7 @@ def _get_massive_files(dataset_accession):
     all_files += ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "peak", massive_host=massive_host)
     all_files += ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "raw", massive_host=massive_host)
 
-    acceptable_extensions = [".mzml", ".mzxml", ".cdf"]
+    acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw"]
 
     all_files = [filename for filename in all_files if os.path.splitext(filename)[1].lower() in acceptable_extensions]
 
@@ -90,13 +90,24 @@ def _get_massive_dataset_information(dataset_accession):
     return dataset_information["title"], dataset_information["summary"]
 
 def _get_mtbls_files(dataset_accession):
-    url = "https://www.ebi.ac.uk:443/metabolights/ws/studies/{}/files?include_raw_data=true".format(dataset_accession)
+    url = "https://www.ebi.ac.uk:443/metabolights/ws/studies/{}/files/tree?include_sub_dir=true".format(dataset_accession)
     r = requests.get(url)
+
     all_files = r.json()["study"]
     all_files = [file_obj for file_obj in all_files if file_obj["directory"] is False]
     all_files = [file_obj for file_obj in all_files if file_obj["type"] == "derived" ]
+
+    acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw"]
+
+    acceptable_files = []
+    for file_object in all_files:
+        try:
+            if os.path.splitext(file_object["file"])[1].lower() in acceptable_extensions:
+                acceptable_files.append(file_object)
+        except:
+            pass
     
-    return all_files
+    return acceptable_files
 
 def _get_mtbls_dataset_information(dataset_accession):
     url = "https://www.ebi.ac.uk/metabolights/ws/studies/{}/description".format(dataset_accession)
