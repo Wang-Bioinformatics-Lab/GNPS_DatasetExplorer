@@ -1,1 +1,1 @@
-web: gunicorn -w 1 app:server
+web: gunicorn -w 1 --threads=6 --worker-class=gthread app:server
