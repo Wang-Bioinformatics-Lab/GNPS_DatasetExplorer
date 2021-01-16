@@ -18,7 +18,14 @@ def get_dataset_files(accession, metadata_source):
     file_df = pd.DataFrame()
 
     if "MSV" in accession:
-        all_files = _get_massive_files(accession)
+        try:
+            all_files = _get_massive_files_cached(accession)
+        except:
+            all_files = []
+
+        if len(all_files) == 0:
+            all_files = _get_massive_files(accession)
+            
         all_files = [filename.replace(accession + "/", "") for filename in all_files]
 
         files_df = pd.DataFrame()
@@ -78,6 +85,18 @@ def _get_massive_files(dataset_accession):
 
     acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw"]
 
+    all_files = [filename for filename in all_files if os.path.splitext(filename)[1].lower() in acceptable_extensions]
+
+    return all_files
+
+def _get_massive_files_cached(dataset_accession):
+    url = "http://dorresteintesthub.ucsd.edu:5235/datasette/database/filename.csv?_stream=on&_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
+    all_files_df = pd.read_csv(url, sep=",")
+
+    all_files = list(all_files_df["filepath"])
+
+    acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw"]
+    
     all_files = [filename for filename in all_files if os.path.splitext(filename)[1].lower() in acceptable_extensions]
 
     return all_files
