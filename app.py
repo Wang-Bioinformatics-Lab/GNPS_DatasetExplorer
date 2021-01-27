@@ -22,15 +22,27 @@ import utils
 server = Flask(__name__)
 app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = 'GNPS - Dataset Browser'
-cache = Cache(app.server, config={
-    #'CACHE_TYPE': "null",
-    'CACHE_TYPE': 'filesystem',
-    'CACHE_DIR': 'temp/flask-cache',
-    'CACHE_DEFAULT_TIMEOUT': 0,
-    'CACHE_THRESHOLD': 1000000
-})
-server = app.server
 
+# Optionally turn on caching
+if __name__ == "__main__":
+    cache = Cache(app.server, config={
+        'CACHE_TYPE': "null",
+        #'CACHE_TYPE': 'filesystem',
+        'CACHE_DIR': 'temp/flask-cache',
+        'CACHE_DEFAULT_TIMEOUT': 0,
+        'CACHE_THRESHOLD': 1000000
+    })
+else:
+    WORKER_UP = True
+    cache = Cache(app.server, config={
+        #'CACHE_TYPE': "null",
+        'CACHE_TYPE': 'filesystem',
+        'CACHE_DIR': 'temp/flask-cache',
+        'CACHE_DEFAULT_TIMEOUT': 0,
+        'CACHE_THRESHOLD': 1000000
+    })
+
+server = app.server
 
 
 NAVBAR = dbc.Navbar(
@@ -241,6 +253,12 @@ def _get_dataset_description(accession):
 def list_files(accession, metadata_source):
     columns = [{"name": "filename", "id": "filename"}]
     files_df = _get_dataset_files(accession, metadata_source)
+
+    new_columns = files_df.columns
+    for column in new_columns:
+        if column == "filename":
+            continue
+        columns.append({"name": column, "id": column})
 
     return [files_df.to_dict(orient="records"), columns, files_df.to_dict(orient="records"), columns]
 

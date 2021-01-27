@@ -184,6 +184,7 @@ def _add_massive_metadata(files_df, accession):
 
         url = "https://massive.ucsd.edu/ProteoSAFe/result_json.jsp?task={}&view=view_metadata_list".format(dataset_task)
         metadata_list = requests.get("https://massive.ucsd.edu/ProteoSAFe/result_json.jsp?task={}&view=view_metadata_list".format(dataset_task)).json()["blockData"]
+
         if len(metadata_list) == 0:
             return files_df
         
