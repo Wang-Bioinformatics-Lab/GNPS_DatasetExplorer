@@ -75,6 +75,10 @@ def get_dataset_description(accession):
     if "PXD" in accession:
         dataset_title, dataset_description = _get_pxd_dataset_information(accession)
 
+    elif len(accession) == 32:
+        # We're likely looking at a uuid from GNPS, lets hit the API
+        dataset_title, dataset_description = _get_gnps_task_information(accession)
+
     return  dataset_title, dataset_description
 
 
@@ -101,6 +105,13 @@ def _get_gnps_task_files(gnps_task):
         output_list.append(output_dict)
 
     return output_list
+
+def _get_gnps_task_information(accession):
+    url = "https://gnps.ucsd.edu/ProteoSAFe/status_json.jsp?task={}".format(accession)
+    r = requests.get(url)
+    task_information = r.json()
+
+    return task_information["description"], "ProteoSAFe Task {} - Workflow {} - Version {} - User {}".format(accession, task_information["workflow"], task_information["workflow_version"], task_information["user"])
 
 def _get_massive_files(dataset_accession):
     import ftputil
