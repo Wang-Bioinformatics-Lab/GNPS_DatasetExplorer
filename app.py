@@ -207,6 +207,10 @@ def _determine_usi_list(accession, file_table_data, selected_table_data):
     for selected_index in selected_table_data:
         filename = file_table_data[selected_index]["filename"]
         usi = "mzspec:{}:{}".format(accession, filename)
+
+        if len(accession) == 32:
+            usi = "mzspec:GNPS:TASK-{}-{}".format(accession, filename)
+        
         usi_list.append(usi)
 
     return usi_list

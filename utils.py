@@ -36,14 +36,19 @@ def get_dataset_files(accession, metadata_source):
         elif metadata_source == "MASSIVE":
             files_df = _add_massive_metadata(files_df, accession)
 
-    if "MTBLS" in accession:
+    elif "MTBLS" in accession:
         all_files = _get_mtbls_files(accession)
         temp_df = pd.DataFrame(all_files)
         files_df = pd.DataFrame()
         files_df["filename"] = temp_df["file"]
 
-    if "PXD" in accession:
+    elif "PXD" in accession:
         all_files = _get_pxd_files(accession)
+        files_df = pd.DataFrame(all_files)
+
+    elif len(accession) == 32:
+        # We're likely looking at a uuid from GNPS, lets hit the API
+        all_files = _get_gnps_task_files(accession)
         files_df = pd.DataFrame(all_files)
 
     return files_df   
@@ -72,6 +77,30 @@ def get_dataset_description(accession):
 
     return  dataset_title, dataset_description
 
+
+def _get_gnps_task_files(gnps_task):
+    url = "https://gnps.ucsd.edu/ProteoSAFe/ManageParameters?task={}".format(gnps_task)
+    r = requests.get(url)
+    import xmltodict
+    r_json = xmltodict.parse(r.text)
+
+    all_files = []
+    for parameter in r_json["parameters"]["parameter"]:
+        if parameter["@name"] == "upload_file_mapping":
+            filename = parameter["#text"].split("|")[1]
+            all_files.append(filename)
+
+    acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw"]
+
+    all_files = [filename for filename in all_files if os.path.splitext(filename)[1].lower() in acceptable_extensions]
+
+    output_list = []
+    for filename in all_files:
+        output_dict = {}
+        output_dict["filename"] = filename
+        output_list.append(output_dict)
+
+    return output_list
 
 def _get_massive_files(dataset_accession):
     import ftputil
