@@ -51,6 +51,12 @@ def get_dataset_files(accession, metadata_source):
         all_files = _get_gnps_task_files(accession)
         files_df = pd.DataFrame(all_files)
 
+        try:
+            files_df = _add_task_metadata(files_df, accession)
+        except:
+            raise
+            pass
+
     return files_df   
 
 def get_dataset_description(accession):
@@ -241,5 +247,21 @@ def _add_massive_metadata(files_df, accession):
         files_df = files_df.drop("fullfilename", axis=1)
     except:
         pass
+
+    return files_df
+
+def _add_task_metadata(files_df, task):
+    # Trying to get classical network metadata
+    url = "https://gnps.ucsd.edu/ProteoSAFe/result_json.jsp?task={}&view=view_metadata".format(task)
+    metadata_df = pd.DataFrame(requests.get(url).json()["blockData"])
+
+    files_df["fullfilename"] = files_df["filename"]
+    files_df["filename"] = files_df["fullfilename"].apply(lambda x: os.path.basename(x))
+    
+    metadata_df["filename"] = metadata_df["_dyn_#filename"].apply(lambda x: x.replace("_dyn_#", ""))
+    files_df = files_df.merge(metadata_df, how="left", on="filename")
+
+    files_df = files_df.drop("fullfilename", axis=1)
+    files_df = files_df.drop("_dyn_#filename", axis=1)
 
     return files_df
