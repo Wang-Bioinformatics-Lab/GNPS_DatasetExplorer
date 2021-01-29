@@ -14,6 +14,7 @@ from flask import Flask, send_from_directory
 import pandas as pd
 import requests
 import uuid
+import json
 import dash_table
 from flask_caching import Cache
 
@@ -202,16 +203,27 @@ def _get_group_usi_string(gnps_task, metadata_column, metadata_term):
 
     return usi_string
 
-def _determine_usi_list(accession, file_table_data, selected_table_data):
+def _determine_usi_list(accession, file_table_data, selected_table_data, get_all=False):
     usi_list = []
-    for selected_index in selected_table_data:
-        filename = file_table_data[selected_index]["filename"]
-        usi = "mzspec:{}:{}".format(accession, filename)
 
-        if len(accession) == 32:
-            usi = "mzspec:GNPS:TASK-{}-{}".format(accession, filename)
-        
-        usi_list.append(usi)
+    if get_all is True:
+        for i in range(len(file_table_data)):
+            filename = file_table_data[i]["filename"]
+            usi = "mzspec:{}:{}".format(accession, filename)
+
+            if len(accession) == 32:
+                usi = "mzspec:GNPS:TASK-{}-{}".format(accession, filename)
+            
+            usi_list.append(usi)
+    else:
+        for selected_index in selected_table_data:
+            filename = file_table_data[selected_index]["filename"]
+            usi = "mzspec:{}:{}".format(accession, filename)
+
+            if len(accession) == 32:
+                usi = "mzspec:GNPS:TASK-{}-{}".format(accession, filename)
+            
+            usi_list.append(usi)
 
     return usi_list
 
@@ -233,13 +245,25 @@ def create_link(accession, file_table_data, selected_table_data, file_table_data
     url_params["usi"] = usi_string1
     url_params["usi2"] = usi_string2
 
-    url_provenance = dbc.Button("Visualize Files", block=True, color="primary", className="mr-1")
-    provenance_link_object = dcc.Link(url_provenance, href="https://gnps-lcms.ucsd.edu/?" + urllib.parse.urlencode(url_params) , target="_blank")
+    total_file_count = len(usi_list1) + sum(usi_list2)
+
+    url_provenance = dbc.Button("Visualize {} Files".format(total_file_count), block=False, color="primary", className="mr-1")
+    provenance_link_object = dcc.Link(url_provenance, href="https://gnps-lcms.ucsd.edu/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
+
+    # Selecting the max of all files
+    all_usi_list = _determine_usi_list(accession, file_table_data, selected_table_data, get_all=True)
+    all_usi_list = all_usi_list[:50] # Lets limit to 50 here
+    
+    url_params = {}
+    url_params["usi"] = "\n".join(all_usi_list)
+
+    link_all = dbc.Button("Visualize All {} Files".format(len(all_usi_list)), block=False, color="primary", className="mr-1")
+    link_all_object = dcc.Link(link_all, href="https://gnps-lcms.ucsd.edu/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
 
     # Selection Text
     selection_text = "Selected {} Default Files and {} Comparison Files for LCMS Analysis".format(len(usi_list1), len(usi_list2))
 
-    return [[html.Br(), html.Hr(), selection_text, html.Br(), html.Br(), provenance_link_object]]
+    return [[html.Br(), html.Hr(), selection_text, html.Br(), html.Br(), provenance_link_object, link_all_object]]
 
 @cache.memoize()
 def _get_dataset_files(accession, metadata_source):
