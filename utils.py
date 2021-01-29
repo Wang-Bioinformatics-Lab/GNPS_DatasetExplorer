@@ -54,7 +54,6 @@ def get_dataset_files(accession, metadata_source):
         try:
             files_df = _add_task_metadata(files_df, accession)
         except:
-            raise
             pass
 
     return files_df   
