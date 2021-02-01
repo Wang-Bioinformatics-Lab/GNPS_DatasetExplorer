@@ -104,6 +104,32 @@ DASHBOARD = [
                             "left":"20px",
                         }
                     ),
+                dbc.Col(
+                    dbc.FormGroup(
+                        [
+                            dbc.Label("Page Size", width=4.8, style={"width":"100px"}),
+                            dcc.Dropdown(
+                                id='page_size',
+                                options=[
+                                    {'label': '10', 'value': '10'},
+                                    {'label': '30', 'value': '30'},
+                                    {'label': '100', 'value': '100'},
+                                ],
+                                searchable=False,
+                                clearable=False,
+                                value="10",
+                                style={
+                                    "width":"60%",
+                                }
+                            )
+                        ],
+                        row=True,
+                        className="mb-3",
+                    ),
+                    style={
+                            "left":"20px",
+                        }
+                    ),
             ]),
             html.Hr(),
 
@@ -120,7 +146,7 @@ DASHBOARD = [
                 columns=[{"name": "filename", "id": "filename"}],
                 data=[],
                 row_selectable='multi',
-                page_size= 10,
+                page_size=10,
                 filter_action="native",
                 export_format="xlsx"
             ),
@@ -329,6 +355,15 @@ def dataset_information(accession):
     dataset_title, dataset_description = _get_dataset_description(accession)
 
     return [dataset_title, dataset_description]
+
+
+@app.callback(
+    [Output('file-table', 'page_size'), Output('file-table2', 'page_size')],
+    [Input('page_size', 'value')],
+)
+def set_page_size(page_size):
+    return [int(page_size), int(page_size)]
+
 
 
 if __name__ == "__main__":
