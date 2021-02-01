@@ -158,7 +158,8 @@ DASHBOARD = [
             html.A("Metabolights Dataset", href="/MTBLS1842"),
             html.Br(),
             html.A("ProteoXchange Dataset", href="/PXD005011"),
-
+            html.Br(),
+            html.A("GNPS Analysis Task", href="/1ad7bc366aef45ce81d2dfcca0a9a5e7")
         ]
     )
 ]
@@ -227,6 +228,22 @@ def _determine_usi_list(accession, file_table_data, selected_table_data, get_all
 
     return usi_list
 
+def _determine_gnps_list(accession, file_table_data, selected_table_data):
+    file_list = []
+
+    for selected_index in selected_table_data:
+        filename = file_table_data[selected_index]["filename"]
+        file_path = "f.{}/{}".format(accession, filename)
+
+        if len(accession) == 32:
+            file_path = "f.{}".format(filename)
+        
+        file_list.append(file_path)
+
+    return file_list
+
+
+
 @app.callback([Output('link-button', 'children')],
               [Input('dataset_accession', 'value'), 
               Input('file-table', 'derived_virtual_data'),
@@ -248,7 +265,7 @@ def create_link(accession, file_table_data, selected_table_data, file_table_data
     total_file_count = len(usi_list1) + sum(usi_list2)
 
     url_provenance = dbc.Button("Visualize {} Files".format(total_file_count), block=False, color="primary", className="mr-1")
-    provenance_link_object = dcc.Link(url_provenance, href="https://gnps-lcms.ucsd.edu/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
+    link_selected_object = dcc.Link(url_provenance, href="https://gnps-lcms.ucsd.edu/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
 
     # Selecting the max of all files
     all_usi_list = _determine_usi_list(accession, file_table_data, selected_table_data, get_all=True)
@@ -260,10 +277,22 @@ def create_link(accession, file_table_data, selected_table_data, file_table_data
     link_all = dbc.Button("Visualize All {} Files".format(len(all_usi_list)), block=False, color="primary", className="mr-1")
     link_all_object = dcc.Link(link_all, href="https://gnps-lcms.ucsd.edu/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
 
+    # Button for networking
+    gnps_file_list = _determine_gnps_list(accession, file_table_data, selected_table_data)
+    parameters = {}
+    parameters["workflow"] = "METABOLOMICS-SNETS-V2"
+    parameters["spec_on_server"] = ";".join(gnps_file_list)
+
+    gnps_url = "https://gnps.ucsd.edu/ProteoSAFe/index.jsp?params="
+    gnps_url = gnps_url + urllib.parse.quote(json.dumps(parameters))
+
+    networking_button = dbc.Button("Molecular Network {} Files at GNPS".format(len(gnps_file_list)), color="primary", className="mr-1")
+    networking_link = dcc.Link(networking_button, href=gnps_url, target="_blank")
+
     # Selection Text
     selection_text = "Selected {} Default Files and {} Comparison Files for LCMS Analysis".format(len(usi_list1), len(usi_list2))
 
-    return [[html.Br(), html.Hr(), selection_text, html.Br(), html.Br(), provenance_link_object, link_all_object]]
+    return [[html.Br(), html.Hr(), selection_text, html.Br(), html.Br(), link_selected_object, networking_link, link_all_object]]
 
 @cache.memoize()
 def _get_dataset_files(accession, metadata_source):
