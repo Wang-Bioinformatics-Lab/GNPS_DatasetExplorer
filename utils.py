@@ -112,21 +112,22 @@ def _get_massive_files(dataset_accession):
 
     try:
         all_files_df = _get_massive_files_cached(dataset_accession)
-        all_files = all_files_df["filepath"]
     except:
-        all_files = []
+        pass
 
-    if len(all_files) == 0:
-        all_files = _get_massive_files_ftp(dataset_accession)
+    if len(all_files_df) == 0:
+        all_files_df = _get_massive_files_ftp(dataset_accession)
         
-    all_files = [filename.replace(dataset_accession + "/", "") for filename in all_files]
-
+    all_files_df["filepath"] = all_files_df["filepath"].apply(lambda x: x.replace(dataset_accession + "/", "") )
+    
     files_df = pd.DataFrame()
-    files_df["filename"] = all_files
+    files_df["filename"] = all_files_df["filepath"]
 
     # Adding more information if possible
     if "collection" in all_files_df:
         files_df["collection"] = all_files_df["collection"]
+
+    if "size_mb" in all_files_df:
         files_df["size_mb"] = all_files_df["size_mb"]
         files_df["ms2"] = all_files_df["spectra_ms2"]
         files_df["Vendor"] = all_files_df["instrument_vendor"]
@@ -149,11 +150,14 @@ def _get_massive_files_ftp(dataset_accession):
 
     all_files = [filename for filename in all_files if os.path.splitext(filename)[1].lower() in acceptable_extensions]
 
-    return all_files
+    all_files_df = pd.DataFrame()
+    all_files_df["filepath"] = all_files
+
+    return all_files_df
 
 def _get_massive_files_cached(dataset_accession):
-    #url = "http://dorresteintesthub.ucsd.edu:5235/datasette/database/filename.csv?_stream=on&_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
-    url = "http://mingwangbeta.ucsd.edu:5235/datasette/database/filename.csv?_stream=on&_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
+    url = "http://dorresteintesthub.ucsd.edu:5235/datasette/database/filename.csv?_stream=on&_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
+    #url = "http://mingwangbeta.ucsd.edu:5235/datasette/database/filename.csv?_stream=on&_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
     all_files_df = pd.read_csv(url, sep=",")
 
     all_files = list(all_files_df["filepath"])
