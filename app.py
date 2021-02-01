@@ -85,12 +85,13 @@ DASHBOARD = [
                             dcc.Dropdown(
                                 id='metadata_source',
                                 options=[
+                                    {'label': 'DEFAULT', 'value': 'DEFAULT'},
                                     {'label': 'REDU', 'value': 'REDU'},
-                                    {'label': 'MASSIVE', 'value': 'MASSIVE'}
+                                    {'label': 'MASSIVE', 'value': 'MASSIVE'},
                                 ],
                                 searchable=False,
                                 clearable=False,
-                                value="REDU",
+                                value="DEFAULT",
                                 style={
                                     "width":"60%",
                                 }

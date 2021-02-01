@@ -18,18 +18,7 @@ def get_dataset_files(accession, metadata_source):
     file_df = pd.DataFrame()
 
     if "MSV" in accession:
-        try:
-            all_files = _get_massive_files_cached(accession)
-        except:
-            all_files = []
-
-        if len(all_files) == 0:
-            all_files = _get_massive_files(accession)
-            
-        all_files = [filename.replace(accession + "/", "") for filename in all_files]
-
-        files_df = pd.DataFrame()
-        files_df["filename"] = all_files
+        files_df = _get_massive_files(accession)
 
         if metadata_source == "REDU":
             files_df = _add_redu_metadata(files_df, accession)
@@ -119,6 +108,34 @@ def _get_gnps_task_information(accession):
     return task_information["description"], "ProteoSAFe Task {} - Workflow {} - Version {} - User {}".format(accession, task_information["workflow"], task_information["workflow_version"], task_information["user"])
 
 def _get_massive_files(dataset_accession):
+    all_files_df = pd.DataFrame()
+
+    try:
+        all_files_df = _get_massive_files_cached(dataset_accession)
+        all_files = all_files_df["filepath"]
+    except:
+        all_files = []
+
+    if len(all_files) == 0:
+        all_files = _get_massive_files_ftp(dataset_accession)
+        
+    all_files = [filename.replace(dataset_accession + "/", "") for filename in all_files]
+
+    files_df = pd.DataFrame()
+    files_df["filename"] = all_files
+
+    # Adding more information if possible
+    if "collection" in all_files_df:
+        files_df["collection"] = all_files_df["collection"]
+        files_df["size_mb"] = all_files_df["size_mb"]
+        files_df["ms2"] = all_files_df["spectra_ms2"]
+        files_df["Vendor"] = all_files_df["instrument_vendor"]
+        files_df["Model"] = all_files_df["instrument_model"]
+
+    return files_df
+
+
+def _get_massive_files_ftp(dataset_accession):
     import ftputil
     import ming_proteosafe_library
 
@@ -135,7 +152,8 @@ def _get_massive_files(dataset_accession):
     return all_files
 
 def _get_massive_files_cached(dataset_accession):
-    url = "http://dorresteintesthub.ucsd.edu:5235/datasette/database/filename.csv?_stream=on&_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
+    #url = "http://dorresteintesthub.ucsd.edu:5235/datasette/database/filename.csv?_stream=on&_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
+    url = "http://mingwangbeta.ucsd.edu:5235/datasette/database/filename.csv?_stream=on&_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
     all_files_df = pd.read_csv(url, sep=",")
 
     all_files = list(all_files_df["filepath"])
@@ -144,7 +162,9 @@ def _get_massive_files_cached(dataset_accession):
     
     all_files = [filename for filename in all_files if os.path.splitext(filename)[1].lower() in acceptable_extensions]
 
-    return all_files
+    all_files_df = all_files_df[all_files_df["filepath"].isin(all_files)]
+
+    return all_files_df
 
 def _get_massive_dataset_information(dataset_accession):
     url = "http://massive.ucsd.edu/ProteoSAFe/proxi/v0.1/datasets/{}".format(dataset_accession)
