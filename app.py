@@ -40,7 +40,7 @@ else:
         'CACHE_TYPE': 'filesystem',
         'CACHE_DIR': 'temp/flask-cache',
         'CACHE_DEFAULT_TIMEOUT': 0,
-        'CACHE_THRESHOLD': 1000000
+        'CACHE_THRESHOLD': 120
     })
 
 server = app.server
