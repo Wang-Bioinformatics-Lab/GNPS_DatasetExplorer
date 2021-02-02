@@ -124,6 +124,7 @@ def _get_massive_files(dataset_accession):
     # Adding more information if possible
     if "collection" in all_files_df:
         files_df["collection"] = all_files_df["collection"]
+        files_df["update_name"] = all_files_df["update_name"]
 
     if "size_mb" in all_files_df:
         files_df["size_mb"] = all_files_df["size_mb"]
