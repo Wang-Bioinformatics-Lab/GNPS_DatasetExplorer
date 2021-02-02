@@ -8,8 +8,9 @@ def test_msv():
     print(utils.get_dataset_files(accession, "REDU"))
 
 def test_mtbls():
-    accession = "MTBLS1842"
-    print(utils.get_dataset_files(accession, "REDU"))
+    accessions = ["MTBLS1842"]
+    for accession in accessions:
+        utils.get_dataset_files(accession, "REDU")
 
 def test_pride():
     accessions = ["PXD005011", "PXD001726"]
