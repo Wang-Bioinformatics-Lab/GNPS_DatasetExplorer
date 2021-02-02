@@ -181,9 +181,11 @@ def _get_mtbls_files(dataset_accession):
     url = "https://www.ebi.ac.uk:443/metabolights/ws/studies/{}/files/tree?include_sub_dir=true".format(dataset_accession)
     r = requests.get(url)
 
+    acceptable_types = ['raw', 'derived']
+    
     all_files = r.json()["study"]
     all_files = [file_obj for file_obj in all_files if file_obj["directory"] is False]
-    all_files = [file_obj for file_obj in all_files if file_obj["type"] == "derived" ]
+    all_files = [file_obj for file_obj in all_files if file_obj["type"] in acceptable_types]
 
     acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw"]
 

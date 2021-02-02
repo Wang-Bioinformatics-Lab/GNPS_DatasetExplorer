@@ -8,7 +8,7 @@ def test_msv():
     print(utils.get_dataset_files(accession, "REDU"))
 
 def test_mtbls():
-    accessions = ["MTBLS1842"]
+    accessions = ["MTBLS2053", "MTBLS1842"]
     for accession in accessions:
         utils.get_dataset_files(accession, "REDU")
 
