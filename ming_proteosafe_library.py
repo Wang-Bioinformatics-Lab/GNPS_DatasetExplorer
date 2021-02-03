@@ -530,13 +530,19 @@ def get_all_files_in_dataset_folder(dataset_accession, folder_prefix, username, 
 
     return all_files
 
-def get_all_files_in_dataset_folder_ftp(dataset_accession, folder_prefix, includefilemetadata=False, massive_host=None):
+def get_all_files_in_dataset_folder_ftp(dataset_accession, folder_prefix, includefilemetadata=False, massive_host=None, dataset_password=""):
     import ftputil
 
     if massive_host == None:
-        massive_host = ftputil.FTPHost("massive.ucsd.edu", "anonymous", "")
+        if len(dataset_password) > 0:
+            massive_host = ftputil.FTPHost("massive.ucsd.edu", dataset_accession, dataset_password)
+        else:
+            massive_host = ftputil.FTPHost("massive.ucsd.edu", "anonymous", "")
 
-    directory = os.path.join(dataset_accession, folder_prefix)
+    if len(dataset_password) > 0:
+        directory = os.path.join(folder_prefix)
+    else:
+        directory = os.path.join(dataset_accession, folder_prefix)
 
     all_files = []
 

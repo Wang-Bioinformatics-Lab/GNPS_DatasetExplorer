@@ -5,7 +5,7 @@ import os
 import metabolights
 
 
-def get_dataset_files(accession, metadata_source):
+def get_dataset_files(accession, metadata_source, dataset_password=""):
     """This gives a pandas dataframe with files and appended metadata
 
     Args:
@@ -19,7 +19,7 @@ def get_dataset_files(accession, metadata_source):
     file_df = pd.DataFrame()
 
     if "MSV" in accession:
-        files_df = _get_massive_files(accession)
+        files_df = _get_massive_files(accession, dataset_password=dataset_password)
 
         if metadata_source == "REDU":
             files_df = _add_redu_metadata(files_df, accession)
@@ -105,7 +105,7 @@ def _get_gnps_task_information(accession):
 
     return task_information["description"], "ProteoSAFe Task {} - Workflow {} - Version {} - User {}".format(accession, task_information["workflow"], task_information["workflow_version"], task_information["user"])
 
-def _get_massive_files(dataset_accession):
+def _get_massive_files(dataset_accession, dataset_password=""):
     all_files_df = pd.DataFrame()
 
     try:
@@ -114,7 +114,7 @@ def _get_massive_files(dataset_accession):
         pass
 
     if len(all_files_df) == 0:
-        all_files_df = _get_massive_files_ftp(dataset_accession)
+        all_files_df = _get_massive_files_ftp(dataset_accession, dataset_password=dataset_password)
         
     all_files_df["filepath"] = all_files_df["filepath"].apply(lambda x: x.replace(dataset_accession + "/", "") )
     
@@ -135,15 +135,18 @@ def _get_massive_files(dataset_accession):
     return files_df
 
 
-def _get_massive_files_ftp(dataset_accession):
+def _get_massive_files_ftp(dataset_accession, dataset_password=""):
     import ftputil
     import ming_proteosafe_library
 
-    massive_host = ftputil.FTPHost("massive.ucsd.edu", "anonymous", "")
+    if len(dataset_password) > 0:
+        massive_host = ftputil.FTPHost("massive.ucsd.edu", dataset_accession, dataset_password)
+    else:
+        massive_host = ftputil.FTPHost("massive.ucsd.edu", "anonymous", "")
 
-    all_files = ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "ccms_peak", massive_host=massive_host)
-    all_files += ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "peak", massive_host=massive_host)
-    all_files += ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "raw", massive_host=massive_host)
+    all_files = ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "ccms_peak", massive_host=massive_host, dataset_password=dataset_password)
+    all_files += ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "peak", massive_host=massive_host, dataset_password=dataset_password)
+    all_files += ming_proteosafe_library.get_all_files_in_dataset_folder_ftp(dataset_accession, "raw", massive_host=massive_host, dataset_password=dataset_password)
 
     acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw"]
 

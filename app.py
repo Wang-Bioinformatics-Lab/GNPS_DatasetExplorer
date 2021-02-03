@@ -77,6 +77,13 @@ DASHBOARD = [
                 ],
                 className="mb-3",
             ),
+            dbc.InputGroup(
+                [
+                    dbc.InputGroupAddon("Dataset Password (if private MSV) - Beta Feature", addon_type="prepend"),
+                    dbc.Input(id='dataset_password', placeholder="Enter Dataset Password", type="password", value=""),
+                ],
+                className="mb-3",
+            ),
             html.Br(),
             dbc.Row([
                 dbc.Col(
@@ -232,13 +239,16 @@ def _get_group_usi_string(gnps_task, metadata_column, metadata_term):
 
     return usi_string
 
-def _determine_usi_list(accession, file_table_data, selected_table_data, get_all=False):
+def _determine_usi_list(accession, file_table_data, selected_table_data, get_all=False, private=False):
     usi_list = []
 
     if get_all is True:
         for i in range(len(file_table_data)):
             filename = file_table_data[i]["filename"]
-            usi = "mzspec:{}:{}".format(accession, filename)
+            if private:
+                usi = "mzspec:PRIVATE{}:{}".format(accession, filename)
+            else:
+                usi = "mzspec:{}:{}".format(accession, filename)
 
             if len(accession) == 32:
                 usi = "mzspec:GNPS:TASK-{}-{}".format(accession, filename)
@@ -247,7 +257,10 @@ def _determine_usi_list(accession, file_table_data, selected_table_data, get_all
     else:
         for selected_index in selected_table_data:
             filename = file_table_data[selected_index]["filename"]
-            usi = "mzspec:{}:{}".format(accession, filename)
+            if private:
+                usi = "mzspec:PRIVATE{}:{}".format(accession, filename)
+            else:
+                usi = "mzspec:{}:{}".format(accession, filename)
 
             if len(accession) == 32:
                 usi = "mzspec:GNPS:TASK-{}-{}".format(accession, filename)
@@ -273,15 +286,21 @@ def _determine_gnps_list(accession, file_table_data, selected_table_data):
 
 
 @app.callback([Output('link-button', 'children')],
-              [Input('dataset_accession', 'value'), 
-              Input('file-table', 'derived_virtual_data'),
-              Input('file-table', 'derived_virtual_selected_rows'),
-              Input('file-table2', 'derived_virtual_data'),
-              Input('file-table2', 'derived_virtual_selected_rows'),
+              [
+                  Input('dataset_accession', 'value'), 
+                  Input('dataset_password', 'value'), 
+                  Input('file-table', 'derived_virtual_data'),
+                  Input('file-table', 'derived_virtual_selected_rows'),
+                  Input('file-table2', 'derived_virtual_data'),
+                  Input('file-table2', 'derived_virtual_selected_rows'),
               ])
-def create_link(accession, file_table_data, selected_table_data, file_table_data2, selected_table_data2):
-    usi_list1 = _determine_usi_list(accession, file_table_data, selected_table_data)
-    usi_list2 = _determine_usi_list(accession, file_table_data2, selected_table_data2)
+def create_link(accession, dataset_password, file_table_data, selected_table_data, file_table_data2, selected_table_data2):
+    is_private = False
+    if len(dataset_password) > 0:
+        is_private = True
+
+    usi_list1 = _determine_usi_list(accession, file_table_data, selected_table_data, private=is_private)
+    usi_list2 = _determine_usi_list(accession, file_table_data2, selected_table_data2, private=is_private)
 
     usi_string1 = "\n".join(usi_list1)
     usi_string2 = "\n".join(usi_list2)
@@ -296,7 +315,7 @@ def create_link(accession, file_table_data, selected_table_data, file_table_data
     link_selected_object = dcc.Link(url_provenance, href="https://gnps-lcms.ucsd.edu/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
 
     # Selecting the max of all files
-    all_usi_list = _determine_usi_list(accession, file_table_data, selected_table_data, get_all=True)
+    all_usi_list = _determine_usi_list(accession, file_table_data, selected_table_data, get_all=True, private=is_private)
     all_usi_list = all_usi_list[:50] # Lets limit to 50 here
     
     url_params = {}
@@ -323,8 +342,8 @@ def create_link(accession, file_table_data, selected_table_data, file_table_data
     return [[html.Br(), html.Hr(), selection_text, html.Br(), html.Br(), link_selected_object, networking_link, link_all_object]]
 
 @cache.memoize()
-def _get_dataset_files(accession, metadata_source):
-    return utils.get_dataset_files(accession, metadata_source)
+def _get_dataset_files(accession, metadata_source, dataset_password=""):
+    return utils.get_dataset_files(accession, metadata_source, dataset_password=dataset_password)
 
 @cache.memoize()
 def _get_dataset_description(accession):
@@ -333,11 +352,11 @@ def _get_dataset_description(accession):
 # This function will rerun at any time that the selection is updated for column
 @app.callback(
     [Output('file-table', 'data'), Output('file-table', 'columns'), Output('file-table2', 'data'), Output('file-table2', 'columns')],
-    [Input('dataset_accession', 'value'), Input("metadata_source", "value")],
+    [Input('dataset_accession', 'value'), Input('dataset_password', 'value'), Input("metadata_source", "value")],
 )
-def list_files(accession, metadata_source):
+def list_files(accession, dataset_password, metadata_source):
     columns = [{"name": "filename", "id": "filename"}]
-    files_df = _get_dataset_files(accession, metadata_source)
+    files_df = _get_dataset_files(accession, metadata_source, dataset_password=dataset_password)
 
     new_columns = files_df.columns
     for column in new_columns:
@@ -350,10 +369,16 @@ def list_files(accession, metadata_source):
 # This function will rerun at any time that the selection is updated for column
 @app.callback(
     [Output('dataset-title', 'children'), Output('dataset-details', 'children')],
-    [Input('dataset_accession', 'value')],
+    [Input('dataset_accession', 'value'), Input('dataset_password', 'value')],
 )
-def dataset_information(accession):
-    dataset_title, dataset_description = _get_dataset_description(accession)
+def dataset_information(accession, dataset_password):
+    try:
+        dataset_title, dataset_description = _get_dataset_description(accession)
+    except:
+        if len(dataset_password) > 0:
+            return ["Private Dataset - {}".format(accession), "Private Dataset No Description"]
+        else:
+            return ["Unknown Dataset - {}".format(accession), "Unknown Dataset No Description"]
 
     return [dataset_title, dataset_description]
 
