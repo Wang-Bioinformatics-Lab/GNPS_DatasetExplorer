@@ -155,8 +155,6 @@ def _get_massive_files_ftp(dataset_accession, dataset_password=""):
     all_files_df = pd.DataFrame()
     all_files_df["filepath"] = all_files
 
-    print(all_files_df)
-
     return all_files_df
 
 def _get_massive_files_cached(dataset_accession):
