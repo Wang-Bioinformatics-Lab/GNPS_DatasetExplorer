@@ -77,6 +77,13 @@ DASHBOARD = [
                 ],
                 className="mb-3",
             ),
+            dbc.InputGroup(
+                [
+                    dbc.InputGroupAddon("Dataset Password (if private)", addon_type="prepend"),
+                    dbc.Input(id='dataset_password', placeholder="Enter Dataset Password", type="password", value=""),
+                ],
+                className="mb-3",
+            ),
             html.Br(),
             dbc.Row([
                 dbc.Col(
@@ -323,8 +330,8 @@ def create_link(accession, file_table_data, selected_table_data, file_table_data
     return [[html.Br(), html.Hr(), selection_text, html.Br(), html.Br(), link_selected_object, networking_link, link_all_object]]
 
 @cache.memoize()
-def _get_dataset_files(accession, metadata_source):
-    return utils.get_dataset_files(accession, metadata_source)
+def _get_dataset_files(accession, metadata_source, dataset_password=""):
+    return utils.get_dataset_files(accession, metadata_source, dataset_password=dataset_password)
 
 @cache.memoize()
 def _get_dataset_description(accession):
@@ -333,11 +340,11 @@ def _get_dataset_description(accession):
 # This function will rerun at any time that the selection is updated for column
 @app.callback(
     [Output('file-table', 'data'), Output('file-table', 'columns'), Output('file-table2', 'data'), Output('file-table2', 'columns')],
-    [Input('dataset_accession', 'value'), Input("metadata_source", "value")],
+    [Input('dataset_accession', 'value'), Input('dataset_password', 'value'), Input("metadata_source", "value")],
 )
-def list_files(accession, metadata_source):
+def list_files(accession, dataset_password, metadata_source):
     columns = [{"name": "filename", "id": "filename"}]
-    files_df = _get_dataset_files(accession, metadata_source)
+    files_df = _get_dataset_files(accession, metadata_source, dataset_password=dataset_password)
 
     new_columns = files_df.columns
     for column in new_columns:
