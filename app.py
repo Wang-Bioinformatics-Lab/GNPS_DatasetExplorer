@@ -285,7 +285,9 @@ def _determine_gnps_list(accession, file_table_data, selected_table_data):
 
 
 
-@app.callback([Output('link-button', 'children')],
+@app.callback([
+                  Output('link-button', 'children')
+              ],
               [
                   Input('dataset_accession', 'value'), 
                   Input('dataset_password', 'value'), 
@@ -315,13 +317,17 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     link_selected_object = dcc.Link(url_provenance, href="https://gnps-lcms.ucsd.edu/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
 
     # Selecting the max of all files
-    all_usi_list = _determine_usi_list(accession, file_table_data, selected_table_data, get_all=True, private=is_private)
-    all_usi_list = all_usi_list[:50] # Lets limit to 50 here
+    all_usi_list1 = _determine_usi_list(accession, file_table_data, selected_table_data, get_all=True, private=is_private)
+    all_usi_list1 = all_usi_list1[:50] # Lets limit to 50 here
+
+    all_usi_list2 = _determine_usi_list(accession, file_table_data2, selected_table_data, get_all=True, private=is_private)
+    all_usi_list2 = all_usi_list2[:50] # Lets limit to 50 here
     
     url_params = {}
-    url_params["usi"] = "\n".join(all_usi_list)
+    url_params["usi"] = "\n".join(all_usi_list1)
+    url_params["usi2"] = "\n".join(all_usi_list2)
 
-    link_all = dbc.Button("Visualize All {} Files".format(len(all_usi_list)), block=False, color="primary", className="mr-1")
+    link_all = dbc.Button("Visualize All Filtered {} Files (50 max each)".format(len(all_usi_list1) + len(all_usi_list2)), block=False, color="primary", className="mr-1")
     link_all_object = dcc.Link(link_all, href="https://gnps-lcms.ucsd.edu/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
 
     # Button for networking
