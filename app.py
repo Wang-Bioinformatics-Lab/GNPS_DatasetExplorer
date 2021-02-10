@@ -239,7 +239,6 @@ app.layout = html.Div(children=[NAVBAR, BODY])
 def _get_param_from_url(search, param_key, default):
     try:
         params_dict = urllib.parse.parse_qs(search[1:])
-        print(params_dict)
         if param_key in params_dict:
             param_value = str(params_dict[param_key][0])
             return param_value
@@ -269,8 +268,6 @@ def determine_task(pathname, url_search):
     
     dataset_accession = _get_param_from_url(url_search, "dataset_accession", dataset_accession)
     metadata_source = _get_param_from_url(url_search, "metadata_source", "DEFAULT")
-
-    print(url_search, metadata_source)
 
     return [dataset_accession, metadata_source]
 
@@ -453,15 +450,25 @@ def list_files(accession, dataset_password, metadata_source, metadata_option):
         Input('dataset_password', 'value'), 
         Input("metadata_source", "value")
     ],
+    [
+        State('url', 'search')
+    ]
 )
-def list_metadata_options(accession, dataset_password, metadata_source):
-
+def list_metadata_options(accession, dataset_password, metadata_source, url_search):
     metadata_list = utils._get_massive_metadata_options(accession)
 
     options = []
+    options_set = set()
     for metadata in metadata_list:
         options.append({'label': metadata["Uploaded_file"], 'value': metadata["File_descriptor"]})
+        options_set.add(metadata["File_descriptor"])
+
     default_value = options[0]["value"]
+
+    # Checking if URL value is in the set
+    metadata_option = _get_param_from_url(url_search, "metadata_option", "")
+    if metadata_option in options_set:
+        default_value = metadata_option
 
     return [
         default_value,
