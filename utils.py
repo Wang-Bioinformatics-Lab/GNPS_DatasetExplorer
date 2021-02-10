@@ -86,7 +86,7 @@ def _get_gnps_task_files(gnps_task):
             filename = parameter["#text"].split("|")[1]
             all_files.append(filename)
 
-    acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw"]
+    acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw", ".mgf"]
 
     all_files = [filename for filename in all_files if os.path.splitext(filename)[1].lower() in acceptable_extensions]
 

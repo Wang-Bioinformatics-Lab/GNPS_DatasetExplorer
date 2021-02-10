@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 import dash_html_components as html
 import dash_table
 import plotly.express as px
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import os
 from zipfile import ZipFile
 import urllib.parse
@@ -99,7 +99,6 @@ DASHBOARD = [
                                 ],
                                 searchable=False,
                                 clearable=False,
-                                value="DEFAULT",
                                 style={
                                     "width":"60%",
                                 }
@@ -237,20 +236,59 @@ BODY = dbc.Container(
 
 app.layout = html.Div(children=[NAVBAR, BODY])
 
+def _get_param_from_url(search, param_key, default):
+    try:
+        params_dict = urllib.parse.parse_qs(search[1:])
+        print(params_dict)
+        if param_key in params_dict:
+            param_value = str(params_dict[param_key][0])
+            return param_value
+    except:
+        pass
 
+    return default
 
 # This enables parsing the URL to shove a task into the qemistree id
-@app.callback(Output('dataset_accession', 'value'),
-              [Input('url', 'pathname')])
-def determine_task(pathname):
+@app.callback([
+                  Output('dataset_accession', 'value'),
+                  Output("metadata_source", "value")
+              ],
+              [
+                  Input('url', 'pathname')
+              ],
+              [
+                  State('url', 'search')
+              ])
+def determine_task(pathname, url_search):
     # Otherwise, lets use the url
     if pathname is not None and len(pathname) > 1:
-        return pathname[1:]
+        dataset_accession =  pathname[1:]
     else:
-        return "MSV000086206"
-        return "MTBLS1842"
+        dataset_accession = "MSV000086206"
+        #return "MTBLS1842"
+    
+    dataset_accession = _get_param_from_url(url_search, "dataset_accession", dataset_accession)
+    metadata_source = _get_param_from_url(url_search, "metadata_source", "DEFAULT")
+
+    print(url_search, metadata_source)
+
+    return [dataset_accession, metadata_source]
 
 
+@app.callback(Output('url', 'search'),
+              [
+                  Input('dataset_accession', 'value'),
+                  Input('metadata_source', 'value'),
+                  Input('metadata_option', 'value'),
+              ])
+def test_url(dataset_accession, metadata_source, metadata_option):
+    params_dict = {}
+    params_dict["dataset_accession"] = dataset_accession
+    params_dict["metadata_source"] = metadata_source
+    params_dict["metadata_option"] = metadata_option
+
+    return "?{}".format(urllib.parse.urlencode(params_dict))
+    
 def _get_group_usi_string(gnps_task, metadata_column, metadata_term):
     metadata_df = _get_task_metadata_df(gnps_task)
     filesummary_df = _get_task_filesummary_df(gnps_task)
