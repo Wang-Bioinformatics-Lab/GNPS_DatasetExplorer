@@ -460,7 +460,7 @@ def list_metadata_options(accession, dataset_password, metadata_source, url_sear
     options = []
     options_set = set()
     for metadata in metadata_list:
-        options.append({'label': metadata["Uploaded_file"], 'value': metadata["File_descriptor"]})
+        options.append({'label': metadata["Metadata_file"], 'value': metadata["File_descriptor"]})
         options_set.add(metadata["File_descriptor"])
 
     default_value = options[0]["value"]
