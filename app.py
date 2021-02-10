@@ -150,7 +150,7 @@ DASHBOARD = [
                                 clearable=False,
                                 value="",
                                 style={
-                                    "width":"60%",
+                                    "width":"75%",
                                 }
                             )
                         ],
@@ -161,7 +161,6 @@ DASHBOARD = [
                             "left":"20px",
                         }
                     ),
-                dbc.Col(),
             ]),
             html.Hr(),
 
@@ -212,9 +211,13 @@ DASHBOARD = [
 
             html.A("MassIVE Dataset with mzML Files", href="/MSV000086206"),
             html.Br(),
+            html.A("MassIVE Dataset - Nissle Data for Workshop", href="/?dataset_accession=MSV000085443&metadata_source=MASSIVE&metadata_option=f.MSV000085443%2Fupdates%2F2020-05-18_daniel_c0133922%2Fmetadata%2Fmetadata_workshop.txt"),
+            html.Br(),
             html.A("MassIVE Dataset with CDF Files", href="/MSV000086521"),
             html.Br(),
             html.A("Metabolights Dataset", href="/MTBLS1842"),
+            html.Br(),
+            html.A("Metabolights Dataset Imported into GNPS", href="/MSV000080931"),
             html.Br(),
             html.A("ProteoXchange Dataset", href="/PXD005011"),
             html.Br(),
@@ -460,7 +463,7 @@ def list_metadata_options(accession, dataset_password, metadata_source, url_sear
     options = []
     options_set = set()
     for metadata in metadata_list:
-        options.append({'label': metadata["Metadata_file"], 'value': metadata["File_descriptor"]})
+        options.append({'label': metadata["File_descriptor"], 'value': metadata["File_descriptor"]})
         options_set.add(metadata["File_descriptor"])
 
     default_value = options[0]["value"]
