@@ -309,7 +309,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     url_params["usi"] = usi_string1
     url_params["usi2"] = usi_string2
 
-    total_file_count = len(usi_list1) + sum(usi_list2)
+    total_file_count = len(usi_list1) + len(usi_list2)
 
     url_provenance = dbc.Button("Visualize {} Files".format(total_file_count), block=False, color="primary", className="mr-1")
     link_selected_object = dcc.Link(url_provenance, href="https://gnps-lcms.ucsd.edu/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
