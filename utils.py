@@ -5,7 +5,7 @@ import os
 import metabolights
 
 
-def get_dataset_files(accession, metadata_source, dataset_password=""):
+def get_dataset_files(accession, metadata_source, dataset_password="", metadata_option=None):
     """This gives a pandas dataframe with files and appended metadata
 
     Args:
@@ -24,7 +24,7 @@ def get_dataset_files(accession, metadata_source, dataset_password=""):
         if metadata_source == "REDU":
             files_df = _add_redu_metadata(files_df, accession)
         elif metadata_source == "MASSIVE":
-            files_df = _add_massive_metadata(files_df, accession)
+            files_df = _add_massive_metadata(files_df, accession, metadata_option=metadata_option)
 
     elif "MTBLS" in accession:
         all_files = _get_mtbls_files(accession)
@@ -249,19 +249,29 @@ def _add_redu_metadata(files_df, accession):
 
     return files_df
 
-def _add_massive_metadata(files_df, accession):
+
+def _get_massive_metadata_options(accession):
+    dataset_information = requests.get("https://massive.ucsd.edu/ProteoSAFe/MassiveServlet?function=massiveinformation&massiveid={}&_=1601057558273".format(accession)).json()
+    dataset_task = dataset_information["task"]
+
+    url = "https://massive.ucsd.edu/ProteoSAFe/result_json.jsp?task={}&view=view_metadata_list".format(dataset_task)
+    metadata_list = requests.get("https://massive.ucsd.edu/ProteoSAFe/result_json.jsp?task={}&view=view_metadata_list".format(dataset_task)).json()["blockData"]
+
+    return metadata_list
+
+def _add_massive_metadata(files_df, accession, metadata_option=None):
     try:
         # Getting massive task from accession
-        dataset_information = requests.get("https://massive.ucsd.edu/ProteoSAFe/MassiveServlet?function=massiveinformation&massiveid={}&_=1601057558273".format(accession)).json()
-        dataset_task = dataset_information["task"]
-
-        url = "https://massive.ucsd.edu/ProteoSAFe/result_json.jsp?task={}&view=view_metadata_list".format(dataset_task)
-        metadata_list = requests.get("https://massive.ucsd.edu/ProteoSAFe/result_json.jsp?task={}&view=view_metadata_list".format(dataset_task)).json()["blockData"]
+        metadata_list = _get_massive_metadata_options(accession)
 
         if len(metadata_list) == 0:
             return files_df
         
-        metadata_filename = metadata_list[0]["File_descriptor"]
+        if metadata_option is not None and len(metadata_option) > 0:
+            metadata_filename = [metadata_file["File_descriptor"] for metadata_file in metadata_list if metadata_file["File_descriptor"] == metadata_option][0]
+        else:
+            metadata_filename = metadata_list[0]["File_descriptor"]
+
         ftp_url = "ftp://massive.ucsd.edu/{}".format(metadata_filename.replace("f.", ""))
 
         metadata_df = pd.read_csv(ftp_url, sep=None)

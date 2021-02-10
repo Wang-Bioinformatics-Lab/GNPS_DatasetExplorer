@@ -89,7 +89,7 @@ DASHBOARD = [
                 dbc.Col(
                     dbc.FormGroup(
                         [
-                            dbc.Label("Metadata Source", width=4.8, style={"width":"150px"}),
+                            dbc.Label("Metadata Source", width=4.8, style={"width":"180px"}),
                             dcc.Dropdown(
                                 id='metadata_source',
                                 options=[
@@ -138,6 +138,31 @@ DASHBOARD = [
                             "left":"20px",
                         }
                     ),
+            ]),
+            dbc.Row([
+                dbc.Col(
+                    dbc.FormGroup(
+                        [
+                            dbc.Label("Metadata Options", width=4.8, style={"width":"180px"}),
+                            dcc.Dropdown(
+                                id='metadata_option',
+                                options=[],
+                                searchable=False,
+                                clearable=False,
+                                value="",
+                                style={
+                                    "width":"60%",
+                                }
+                            )
+                        ],
+                        row=True,
+                        className="mb-3",
+                    ),
+                    style={
+                            "left":"20px",
+                        }
+                    ),
+                dbc.Col(),
             ]),
             html.Hr(),
 
@@ -348,8 +373,8 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     return [[html.Br(), html.Hr(), selection_text, html.Br(), html.Br(), link_selected_object, networking_link, link_all_object]]
 
 @cache.memoize()
-def _get_dataset_files(accession, metadata_source, dataset_password=""):
-    return utils.get_dataset_files(accession, metadata_source, dataset_password=dataset_password)
+def _get_dataset_files(accession, metadata_source, dataset_password="", metadata_option=None):
+    return utils.get_dataset_files(accession, metadata_source, dataset_password=dataset_password, metadata_option=metadata_option)
 
 @cache.memoize()
 def _get_dataset_description(accession):
@@ -357,12 +382,21 @@ def _get_dataset_description(accession):
 
 # This function will rerun at any time that the selection is updated for column
 @app.callback(
-    [Output('file-table', 'data'), Output('file-table', 'columns'), Output('file-table2', 'data'), Output('file-table2', 'columns')],
-    [Input('dataset_accession', 'value'), Input('dataset_password', 'value'), Input("metadata_source", "value")],
+    [
+        Output('file-table', 'data'), 
+        Output('file-table', 'columns'), 
+        Output('file-table2', 'data'), 
+        Output('file-table2', 'columns')],
+    [
+        Input('dataset_accession', 'value'), 
+        Input('dataset_password', 'value'), 
+        Input("metadata_source", "value"), 
+        Input("metadata_option", "value")
+    ],
 )
-def list_files(accession, dataset_password, metadata_source):
+def list_files(accession, dataset_password, metadata_source, metadata_option):
     columns = [{"name": "filename", "id": "filename"}]
-    files_df = _get_dataset_files(accession, metadata_source, dataset_password=dataset_password)
+    files_df = _get_dataset_files(accession, metadata_source, dataset_password=dataset_password, metadata_option=metadata_option)
 
     new_columns = files_df.columns
     for column in new_columns:
@@ -371,6 +405,31 @@ def list_files(accession, dataset_password, metadata_source):
         columns.append({"name": column, "id": column})
 
     return [files_df.to_dict(orient="records"), columns, files_df.to_dict(orient="records"), columns]
+
+# Metadata Options
+@app.callback(
+    [
+        Output('metadata_option', 'value'), Output('metadata_option', 'options')],
+    [
+        Input('dataset_accession', 'value'), 
+        Input('dataset_password', 'value'), 
+        Input("metadata_source", "value")
+    ],
+)
+def list_metadata_options(accession, dataset_password, metadata_source):
+
+    metadata_list = utils._get_massive_metadata_options(accession)
+
+    options = []
+    for metadata in metadata_list:
+        options.append({'label': metadata["Uploaded_file"], 'value': metadata["File_descriptor"]})
+    default_value = options[0]["value"]
+
+    return [
+        default_value,
+        options
+    ]
+
 
 # This function will rerun at any time that the selection is updated for column
 @app.callback(
