@@ -332,17 +332,27 @@ def _determine_usi_list(accession, file_table_data, selected_table_data, get_all
 
     return usi_list
 
-def _determine_gnps_list(accession, file_table_data, selected_table_data):
+def _determine_gnps_list(accession, file_table_data, selected_table_data, get_all=False):
     file_list = []
 
-    for selected_index in selected_table_data:
-        filename = file_table_data[selected_index]["filename"]
-        file_path = "f.{}/{}".format(accession, filename)
+    if get_all:
+        for i in range(len(file_table_data)):
+            filename = file_table_data[i]["filename"]
+            file_path = "f.{}/{}".format(accession, filename)
 
-        if len(accession) == 32:
-            file_path = "f.{}".format(filename)
-        
-        file_list.append(file_path)
+            if len(accession) == 32:
+                file_path = "f.{}".format(filename)
+            
+            file_list.append(file_path)
+    else:
+        for selected_index in selected_table_data:
+            filename = file_table_data[selected_index]["filename"]
+            file_path = "f.{}/{}".format(accession, filename)
+
+            if len(accession) == 32:
+                file_path = "f.{}".format(filename)
+            
+            file_list.append(file_path)
 
     return file_list
 
@@ -383,7 +393,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     all_usi_list1 = _determine_usi_list(accession, file_table_data, selected_table_data, get_all=True, private=is_private)
     all_usi_list1 = all_usi_list1[:50] # Lets limit to 24 here
 
-    all_usi_list2 = _determine_usi_list(accession, file_table_data2, selected_table_data, get_all=True, private=is_private)
+    all_usi_list2 = _determine_usi_list(accession, file_table_data2, selected_table_data2, get_all=True, private=is_private)
     all_usi_list2 = all_usi_list2[:50] # Lets limit to 24 here
     
     url_params = {}
@@ -394,21 +404,47 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     link_all_object = dcc.Link(link_all, href="https://gnps-lcms.ucsd.edu/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
 
     # Button for networking
-    gnps_file_list = _determine_gnps_list(accession, file_table_data, selected_table_data)
+    gnps_file_list1 = _determine_gnps_list(accession, file_table_data, selected_table_data)
+    gnps_file_list2 = _determine_gnps_list(accession, file_table_data2, selected_table_data2)
     parameters = {}
     parameters["workflow"] = "METABOLOMICS-SNETS-V2"
-    parameters["spec_on_server"] = ";".join(gnps_file_list)
+    parameters["spec_on_server"] = ";".join(gnps_file_list1)
+    parameters["spec_on_server_group2"] = ";".join(gnps_file_list2)
 
     gnps_url = "https://gnps.ucsd.edu/ProteoSAFe/index.jsp?params="
     gnps_url = gnps_url + urllib.parse.quote(json.dumps(parameters))
 
-    networking_button = dbc.Button("Molecular Network {} Files at GNPS".format(len(gnps_file_list)), color="primary", className="mr-1")
+    networking_button = dbc.Button("Molecular Network {} Files at GNPS".format(len(gnps_file_list1) + len(gnps_file_list2)), color="primary", className="mr-1")
     networking_link = dcc.Link(networking_button, href=gnps_url, target="_blank")
+
+    gnps_file_list1 = _determine_gnps_list(accession, file_table_data, selected_table_data, get_all=True)
+    gnps_file_list2 = _determine_gnps_list(accession, file_table_data2, selected_table_data2, get_all=True)
+
+    parameters["spec_on_server"] = ";".join(gnps_file_list1)
+    parameters["spec_on_server_group2"] = ";".join(gnps_file_list2)
+
+    gnps_url = "https://gnps.ucsd.edu/ProteoSAFe/index.jsp?params="
+    gnps_url = gnps_url + urllib.parse.quote(json.dumps(parameters))
+
+    networking_all_button = dbc.Button("Molecular Network All {} Files at GNPS".format(len(gnps_file_list1) + len(gnps_file_list2)), color="primary", className="mr-1")
+    networking_all_link = dcc.Link(networking_all_button, href=gnps_url, target="_blank")
 
     # Selection Text
     selection_text = "Selected {} Default Files and {} Comparison Files for LCMS Analysis".format(len(usi_list1), len(usi_list2))
 
-    return [[html.Br(), html.Hr(), selection_text, html.Br(), html.Br(), link_selected_object, networking_link, link_all_object]]
+    return [
+        [
+            html.Br(), 
+            html.Hr(), 
+            selection_text, 
+            html.Br(), 
+            html.Br(), 
+            link_selected_object, 
+            networking_link, 
+            link_all_object, 
+            networking_all_link
+        ]
+    ]
 
 @cache.memoize()
 def _get_dataset_files(accession, metadata_source, dataset_password="", metadata_option=None):
