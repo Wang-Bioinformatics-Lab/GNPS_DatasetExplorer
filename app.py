@@ -439,9 +439,9 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
             selection_text, 
             html.Br(), 
             html.Br(), 
-            link_selected_object, 
+            link_selected_object, link_all_object,
+            html.Hr(),
             networking_link, 
-            link_all_object, 
             networking_all_link
         ]
     ]
