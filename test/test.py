@@ -5,8 +5,11 @@ import utils
 import metabolights
 
 def test_msv():
-    accession = "MSV000086206"
-    print(utils.get_dataset_files(accession, "REDU"))
+    #accession = "MSV000086206"
+    #dataset_files_df = utils.get_dataset_files(accession, "REDU")
+    
+    accession = "MSV000086873"
+    dataset_files_df = utils.get_dataset_files(accession, "REDU")
 
 def test_mtbls():
     accessions = ["MTBLS2053", "MTBLS1842"]
