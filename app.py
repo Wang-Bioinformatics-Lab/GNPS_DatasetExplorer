@@ -356,7 +356,16 @@ def _determine_gnps_list(accession, file_table_data, selected_table_data, get_al
 
     return file_list
 
+def _determine_row_selection_list(file_table_data, selected_table_data, get_all=False):
+    if get_all:
+        return file_table_data
+    else:
+        output_list = []
 
+        for selected_index in selected_table_data:
+            output_list.append(file_table_data[selected_index])
+
+        return output_list
 
 @app.callback([
                   Output('link-button', 'children')
@@ -429,6 +438,19 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     networking_all_button = dbc.Button("Molecular Network All {} Files at GNPS".format(len(gnps_file_list1) + len(gnps_file_list2)), color="primary", className="mr-1")
     networking_all_link = dcc.Link(networking_all_button, href=gnps_url, target="_blank")
 
+    # Downloading file link
+    if len(usi_list1) > 0:
+        if "MSV" in accession:
+            selected_data_list = _determine_row_selection_list(file_table_data, selected_table_data)
+
+            download_url = "https://gnps-external.ucsd.edu/massiveftpproxy?ftppath=" + os.path.join(accession, selected_data_list[0]["filename"])
+            download_button = dbc.Button("Download First Selected File", color="primary", className="mr-1")
+            download_link = dcc.Link(download_button, href=download_url, target="_blank")
+        else:
+            download_link = html.Br()    
+    else:
+        download_link = html.Br()
+
     # Selection Text
     selection_text = "Selected {} Default Files and {} Comparison Files for LCMS Analysis".format(len(usi_list1), len(usi_list2))
 
@@ -442,7 +464,9 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
             link_selected_object, link_all_object,
             html.Hr(),
             networking_link, 
-            networking_all_link
+            networking_all_link,
+            html.Hr(),
+            download_link
         ]
     ]
 
