@@ -77,14 +77,9 @@ DASHBOARD = [
                 ],
                 className="mb-3",
             ),
-            dbc.InputGroup(
-                [
-                    dbc.InputGroupAddon("Dataset Password (if private MSV) - Beta Feature", addon_type="prepend"),
-                    dbc.Input(id='dataset_password', placeholder="Enter Dataset Password", type="password", value=""),
-                ],
-                className="mb-3",
-            ),
+            dbc.Button("Enter Credentials", block=False, size="sm", id="credentials_modal_button"),
             html.Br(),
+            html.Hr(),
             dbc.Row([
                 dbc.Col(
                     dbc.FormGroup(
@@ -226,6 +221,43 @@ DASHBOARD = [
     )
 ]
 
+PRIVATE_CREDENTIALS_MODAL = [
+    dbc.Modal(
+        [
+            dbc.ModalHeader("Credentials (Beta)"),
+            dbc.ModalBody([
+                dbc.InputGroup(
+                    [
+                        dbc.InputGroupAddon("Dataset Password (if private MSV)", addon_type="prepend"),
+                        dbc.Input(id='dataset_password', placeholder="Enter Dataset Password", type="password", value=""),
+                    ],
+                    className="mb-3",
+                ),
+                html.Hr(),
+                dbc.InputGroup(
+                    [
+                        dbc.InputGroupAddon("JGI Username", addon_type="prepend"),
+                        dbc.Input(id='jgi_username', placeholder="Enter Username Password", value=""),
+                    ],
+                    className="mb-3",
+                ),
+                dbc.InputGroup(
+                    [
+                        dbc.InputGroupAddon("JGI Password", addon_type="prepend"),
+                        dbc.Input(id='jgi_password', placeholder="Enter Dataset Password", type="password", value=""),
+                    ],
+                    className="mb-3",
+                ),
+            ]),
+            dbc.ModalFooter(
+                dbc.Button("Close", id="credentials_modal_close", className="ml-auto")
+            ),
+        ],
+        id="credentials_modal",
+        size="xl",
+    ),
+]
+
 BODY = dbc.Container(
     [
         dbc.Row([
@@ -233,6 +265,9 @@ BODY = dbc.Container(
                 dbc.Card(DASHBOARD)
             ),
         ], style={"marginTop": 30}),
+        dbc.Row(
+            PRIVATE_CREDENTIALS_MODAL
+        )
     ],
     className="mt-12",
 )
@@ -563,6 +598,17 @@ def dataset_information(accession, dataset_password):
 def set_page_size(page_size):
     return [int(page_size), int(page_size)]
 
+# Helping to toggle the modals
+def toggle_modal(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
+
+app.callback(
+    Output("credentials_modal", "is_open"),
+    [Input("credentials_modal_button", "n_clicks"), Input("credentials_modal_close", "n_clicks")],
+    [State("credentials_modal", "is_open")],
+)(toggle_modal)
 
 
 if __name__ == "__main__":
