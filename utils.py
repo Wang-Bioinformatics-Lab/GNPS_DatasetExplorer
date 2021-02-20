@@ -37,6 +37,9 @@ def get_dataset_files(accession, metadata_source, dataset_password="", metadata_
         all_files = _get_pxd_files(accession)
         files_df = pd.DataFrame(all_files)
 
+    elif "ST" in accession:
+        files_df, dataset_accession = _get_metabolomicsworkbench_files(accession)
+
     elif len(accession) == 32:
         # We're likely looking at a uuid from GNPS, lets hit the API
         all_files = _get_gnps_task_files(accession)
@@ -66,6 +69,9 @@ def get_dataset_description(accession):
 
     if "PXD" in accession:
         dataset_title, dataset_description = _get_pxd_dataset_information(accession)
+    
+    if "ST" in accession:
+        dataset_title, dataset_description = _get_metabolomicsworkbench_dataset_information(accession)
 
     elif len(accession) == 32:
         # We're likely looking at a uuid from GNPS, lets hit the API
@@ -211,6 +217,26 @@ def _get_mtbls_dataset_information(dataset_accession):
     title = r.json()["title"]
      
     return title, description
+
+
+def _get_metabolomicsworkbench_files(dataset_accession):
+    # Lets see if it is in massive
+    massive_datasets = requests.get("https://massive.ucsd.edu/ProteoSAFe/datasets_json.jsp").json()["datasets"]
+
+    massive_datasets = [dataset for dataset in massive_datasets if dataset_accession in dataset["title"]]
+
+    if len(massive_datasets) == 0:
+        return pd.DataFrame(), ""
+    
+    dataset_accession = massive_datasets[0]["dataset"]
+
+    return _get_massive_files(dataset_accession), dataset_accession
+        
+def _get_metabolomicsworkbench_dataset_information(dataset_accession):
+    metabolomics_workbench_data = requests.get("https://www.metabolomicsworkbench.org/rest/study/study_id/{}/summary".format(dataset_accession)).json()
+
+    return metabolomics_workbench_data["study_title"], metabolomics_workbench_data["study_summary"]
+
 
 
 def _get_pxd_files(dataset_accession):
