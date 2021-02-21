@@ -482,7 +482,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
             download_button = dbc.Button("Download First Selected File", color="primary", className="mr-1")
             download_link = dcc.Link(download_button, href=download_url, target="_blank")
         else:
-            download_link = html.Br()    
+            download_link = html.Br()
     else:
         download_link = html.Br()
 
