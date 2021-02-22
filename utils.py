@@ -38,7 +38,12 @@ def get_dataset_files(accession, metadata_source, dataset_password="", metadata_
         files_df = pd.DataFrame(all_files)
 
     elif "ST" in accession:
-        files_df, dataset_accession = _get_metabolomicsworkbench_files(accession)
+        files_df, msv_accession = _get_metabolomicsworkbench_files(accession)
+
+        if metadata_source == "REDU":
+            files_df = _add_redu_metadata(files_df, msv_accession)
+        elif metadata_source == "MASSIVE":
+            files_df = _add_massive_metadata(files_df, msv_accession, metadata_option=metadata_option)
 
     elif len(accession) == 32:
         # We're likely looking at a uuid from GNPS, lets hit the API
