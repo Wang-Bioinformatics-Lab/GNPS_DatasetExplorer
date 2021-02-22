@@ -221,16 +221,13 @@ def _get_mtbls_dataset_information(dataset_accession):
 
 def _get_metabolomicsworkbench_files(dataset_accession):
     # Lets see if it is in massive
-    massive_datasets = requests.get("https://massive.ucsd.edu/ProteoSAFe/datasets_json.jsp").json()["datasets"]
+    url = "https://massive.ucsd.edu/ProteoSAFe/QueryDatasets?task=N%2FA&file=&pageSize=30&offset=0&query=%257B%2522full_search_input%2522%253A%2522%2522%252C%2522table_sort_history%2522%253A%2522createdMillis_dsc%2522%252C%2522query%2522%253A%257B%257D%252C%2522title_input%2522%253A%2522{}%2522%257D&target=&_=1606254845533".format(dataset_accession)
+    r = requests.get(url)
+    data_json = r.json()
 
-    massive_datasets = [dataset for dataset in massive_datasets if dataset_accession in dataset["title"]]
+    msv_accession = data_json["row_data"][0]["dataset"]
 
-    if len(massive_datasets) == 0:
-        return pd.DataFrame(), ""
-    
-    dataset_accession = massive_datasets[0]["dataset"]
-
-    return _get_massive_files(dataset_accession), dataset_accession
+    return _get_massive_files(msv_accession), msv_accession
         
 def _get_metabolomicsworkbench_dataset_information(dataset_accession):
     metabolomics_workbench_data = requests.get("https://www.metabolomicsworkbench.org/rest/study/study_id/{}/summary".format(dataset_accession)).json()
