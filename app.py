@@ -520,7 +520,9 @@ def list_files(accession, dataset_password, metadata_source, metadata_option):
     ]
 )
 def list_metadata_options(accession, dataset_password, metadata_source, url_search):
-    metadata_list = utils._get_massive_metadata_options(accession)
+    msv_accession = utils._accession_to_msv_accession(accession)
+    
+    metadata_list = utils._get_massive_metadata_options(msv_accession)
 
     options = []
     options_set = set()
