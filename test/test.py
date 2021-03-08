@@ -19,12 +19,12 @@ def test_mtbls():
         metadata_df = metabolights.get_study_level_metadata(accession, study_metadata_filename)
 
         print(metadata_df)
-    
-    
-    
 
 def test_pride():
     accessions = ["PXD005011", "PXD001726"]
     for accession in accessions:
         utils.get_dataset_files(accession, "REDU")
         utils.get_dataset_description(accession)
+
+def test_workbench():
+    accessions = ["ST001709", ""]
