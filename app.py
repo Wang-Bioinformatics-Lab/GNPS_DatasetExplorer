@@ -221,6 +221,8 @@ DASHBOARD = [
             html.Br(),
             html.A("Metabolomics Workbench Imported into GNPS", href="/ST001257"),
             html.Br(),
+            html.A("Metabolomics Workbench Native", href="/ST001709"),
+            html.Br(),
             html.A("ProteoXchange Dataset", href="/PXD005011"),
             html.Br(),
             html.A("GNPS Analysis Task", href="/1ad7bc366aef45ce81d2dfcca0a9a5e7")
