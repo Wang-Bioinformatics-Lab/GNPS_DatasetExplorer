@@ -163,7 +163,6 @@ DASHBOARD = [
                     ),
             ]),
             html.Hr(),
-
             html.H3(children="Dataset Title Placeholder", id='dataset-title'),
             html.Hr(),
             html.Div(children="Dataset details", id='dataset-details'),
@@ -498,7 +497,12 @@ def _get_dataset_description(accession):
 )
 def list_files(accession, dataset_password, metadata_source, metadata_option):
     columns = [{"name": "filename", "id": "filename"}]
-    files_df = _get_dataset_files(accession, metadata_source, dataset_password=dataset_password, metadata_option=metadata_option)
+
+    # If this errors out, then we want to clear the table
+    try:
+        files_df = _get_dataset_files(accession, metadata_source, dataset_password=dataset_password, metadata_option=metadata_option)
+    except:
+        return [[], columns, [], columns]
 
     new_columns = files_df.columns
     for column in new_columns:
