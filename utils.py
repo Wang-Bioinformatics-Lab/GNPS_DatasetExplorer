@@ -63,8 +63,8 @@ def get_dataset_description(accession):
         [type]: [description]
     """
 
-    dataset_title = "Dataset Title - Error"
-    dataset_description = "Error Description"
+    dataset_title = "Dataset Title - Invalid Accession"
+    dataset_description = "Error Description - Invalid Accession"
 
     if "MSV" in accession:
         dataset_title, dataset_description = _get_massive_dataset_information(accession)
