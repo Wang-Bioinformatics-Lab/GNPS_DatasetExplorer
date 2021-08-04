@@ -163,13 +163,23 @@ DASHBOARD = [
                     ),
             ]),
             html.Hr(),
-            html.H3(children="Dataset Title Placeholder", id='dataset-title'),
+            dcc.Loading(
+                id="dataset-title",
+                children=[html.Div([html.Div(id="loading-output-2")])],
+                type="default",
+            ),
             html.Hr(),
             html.Div(children="Dataset details", id='dataset-details'),
 
             html.Hr(),
             
             html.H3(children='Default File Selection List'),
+            html.Hr(),
+            dcc.Loading(
+                id="file-summary",
+                children=[html.Div([html.Div(id="loading-output-3")])],
+                type="default",
+            ),
             html.Hr(),
             dash_table.DataTable(
                 id='file-table',
@@ -195,7 +205,6 @@ DASHBOARD = [
                 export_format="xlsx"
             ),
             html.Br(),
-
 
             dcc.Loading(
                 id="link-button",
@@ -484,6 +493,7 @@ def _get_dataset_description(accession):
 # This function will rerun at any time that the selection is updated for column
 @app.callback(
     [
+        Output('file-summary', 'children'), 
         Output('file-table', 'data'), 
         Output('file-table', 'columns'), 
         Output('file-table2', 'data'), 
@@ -502,7 +512,7 @@ def list_files(accession, dataset_password, metadata_source, metadata_option):
     try:
         files_df = _get_dataset_files(accession, metadata_source, dataset_password=dataset_password, metadata_option=metadata_option)
     except:
-        return [[], columns, [], columns]
+        return [html.Div("Error: Could not find files for this dataset"), [], columns, [], columns]
 
     new_columns = files_df.columns
     for column in new_columns:
@@ -510,7 +520,9 @@ def list_files(accession, dataset_password, metadata_source, metadata_option):
             continue
         columns.append({"name": column, "id": column})
 
-    return [files_df.to_dict(orient="records"), columns, files_df.to_dict(orient="records"), columns]
+    file_summary = html.Div("This dataset contains {} files that can be viewed by GNPS Dashboard or other GNPS Tools (i.e. mzML, mzXML, .mgf, .raw files)".format(len(files_df)))
+
+    return [[file_summary], files_df.to_dict(orient="records"), columns, files_df.to_dict(orient="records"), columns]
 
 # Metadata Options
 @app.callback(
@@ -563,7 +575,9 @@ def dataset_information(accession, dataset_password):
         else:
             return ["Unknown Dataset - {}".format(accession), "Unknown Dataset No Description"]
 
-    return [dataset_title, dataset_description]
+    dataset_title_div = html.H3(children=[dbc.Badge(accession, color="info", className="ml-1"), dataset_title])
+
+    return [dataset_title_div, dataset_description]
 
 
 @app.callback(
