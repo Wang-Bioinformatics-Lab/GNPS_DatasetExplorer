@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 import os
 import metabolights
-
+from remotezip import RemoteZip
 
 def get_dataset_files(accession, metadata_source, dataset_password="", metadata_option=None):
     """This gives a pandas dataframe with files and appended metadata
@@ -44,6 +44,11 @@ def get_dataset_files(accession, metadata_source, dataset_password="", metadata_
             files_df = _add_redu_metadata(files_df, msv_accession)
         elif metadata_source == "MASSIVE":
             files_df = _add_massive_metadata(files_df, msv_accession, metadata_option=metadata_option)
+    
+    elif "ZENODO" in accession:
+        all_files = _get_zenodo_files(accession)
+        files_df = pd.DataFrame()
+        files_df["filename"] = all_files
 
     elif len(accession) == 32:
         # We're likely looking at a uuid from GNPS, lets hit the API
@@ -268,7 +273,35 @@ def _get_metabolomicsworkbench_dataset_information(dataset_accession):
 
     return metabolomics_workbench_data["study_title"], metabolomics_workbench_data["study_summary"]
 
+def _get_zenodo_files(dataset_accession):
+    zenodo_id = dataset_accession.replace("ZENODO", "").replace("-", "")
 
+    zenodo_url = "https://zenodo.org/api/records/{}".format(zenodo_id)
+    r = requests.get(zenodo_url)
+
+    all_filenames = []
+
+    all_files = r.json()['files']
+    for file in all_files:
+        if file['type'] == 'zip':
+            url = file['links']['self']
+            zip_filename = file['key']
+
+            # Finding all the filenames
+            with RemoteZip(url) as zip:
+                for zip_info in zip.infolist():
+                    actual_filename = zip_info.filename
+
+                    if "__MACOSX" in actual_filename:
+                        continue
+
+                    if actual_filename.endswith(".raw") or \
+                        actual_filename.endswith(".mzML") or \
+                        actual_filename.endswith(".mzXML"):
+                        
+                        all_filenames.append("{}-{}".format(zip_filename, actual_filename))
+
+    return all_filenames
 
 def _get_pxd_files(dataset_accession):
     url = "http://proteomecentral.proteomexchange.org/cgi/GetDataset?ID={}&outputMode=json&test=no".format(dataset_accession)

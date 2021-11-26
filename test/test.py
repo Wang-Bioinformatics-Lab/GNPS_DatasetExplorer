@@ -28,3 +28,9 @@ def test_pride():
 
 def test_workbench():
     accessions = ["ST001709", ""]
+
+def test_zenodo():
+    accessions = ["ZENODO-4989929"]
+
+    for accession in accessions:
+        utils.get_dataset_files(accession, "")
