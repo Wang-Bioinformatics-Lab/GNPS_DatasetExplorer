@@ -45,6 +45,12 @@ def get_dataset_files(accession, metadata_source, dataset_password="", metadata_
         elif metadata_source == "MASSIVE":
             files_df = _add_massive_metadata(files_df, msv_accession, metadata_option=metadata_option)
 
+    elif "JGI:" in accession:
+        all_files = _get_jgi_files(accession)
+        temp_df = pd.DataFrame(all_files)
+        files_df = pd.DataFrame()
+        files_df["filename"] = temp_df["filename"]
+
     elif len(accession) == 32:
         # We're likely looking at a uuid from GNPS, lets hit the API
         all_files = _get_gnps_task_files(accession)
@@ -268,6 +274,37 @@ def _get_metabolomicsworkbench_dataset_information(dataset_accession):
 
     return metabolomics_workbench_data["study_title"], metabolomics_workbench_data["study_summary"]
 
+
+def _get_jgi_files(dataset_accession):
+    url = "https://genome.jgi.doe.gov/portal/ext-api/downloads/get-directory?organism={}&organizedByFileType=false".format(dataset_accession.replace("JGI:", ""))
+    session = requests.Session()
+    r = session.post('https://signon.jgi.doe.gov/signon/create', params={"login": "", "password": ''})
+    cookies = session.cookies.get_dict()
+
+    r = session.get(url, cookies=cookies)
+
+    acceptable_extensions = [".raw", ".mzML", ".mzXML", ".CDF", ".RAW", "cdf"]
+
+    output_list = []
+
+    import xmltodict as xtd
+    import json
+    dataset_list = xtd.parse(r.text)
+    all_folders = dataset_list["organismDownloads"]["folder"]["folder"][0]["folder"][0]["folder"]
+
+    for folder in all_folders:
+        file_url = "https://genome.jgi.doe.gov{}".format(folder["file"]["@url"])
+        filename = folder["file"]["@filename"]
+
+        _, extension = os.path.splitext(filename)
+
+        if extension in acceptable_extensions:
+            output_dict = {}
+            output_dict["filename"] = filename
+            output_dict["remote_link"] = file_url
+            output_list.append(output_dict)
+
+    return output_list 
 
 
 def _get_pxd_files(dataset_accession):
