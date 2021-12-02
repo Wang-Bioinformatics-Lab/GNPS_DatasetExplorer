@@ -1,9 +1,11 @@
 
 import pandas as pd
-import requests
 import os
 import metabolights
 from remotezip import RemoteZip
+import requests
+import requests_cache
+requests_cache.install_cache('requests_cache', expire_after=86400)
 
 def get_dataset_files(accession, metadata_source, dataset_password="", metadata_option=None):
     """This gives a pandas dataframe with files and appended metadata
