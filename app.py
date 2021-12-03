@@ -233,7 +233,9 @@ DASHBOARD = [
             html.Br(),
             html.A("ProteoXchange Dataset", href="/PXD005011"),
             html.Br(),
-            html.A("GNPS Analysis Task", href="/1ad7bc366aef45ce81d2dfcca0a9a5e7")
+            html.A("GNPS Analysis Task", href="/1ad7bc366aef45ce81d2dfcca0a9a5e7"),
+            html.Br(),
+            html.A("Zenodo Dataset", href="/ZENODO-4989929")
         ]
     )
 ]
