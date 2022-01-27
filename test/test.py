@@ -34,3 +34,15 @@ def test_zenodo():
 
     for accession in accessions:
         utils.get_dataset_files(accession, "")
+
+def test_gnps_fbmn():
+    task = "9c8d2902db494db39a292c13cf442dac"
+    files_list = utils._get_gnps_task_files(task)
+
+    print(files_list)
+
+def main():
+    test_gnps_fbmn()
+
+if __name__ == "__main__":
+    main()

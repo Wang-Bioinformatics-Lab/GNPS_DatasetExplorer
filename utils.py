@@ -390,6 +390,7 @@ def _add_task_metadata(files_df, task):
         
         metadata_df["filename"] = metadata_df["_dyn_#filename"].apply(lambda x: x.replace("_dyn_#", ""))
         files_df = files_df.merge(metadata_df, how="left", on="filename")
+        files_df["filename"] = files_df["fullfilename"]
 
         files_df = files_df.drop("fullfilename", axis=1)
         files_df = files_df.drop("_dyn_#filename", axis=1)
