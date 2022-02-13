@@ -367,6 +367,8 @@ def _add_massive_metadata(files_df, accession, metadata_option=None):
         ftp_url = "ftp://massive.ucsd.edu/{}".format(metadata_filename.replace("f.", ""))
 
         metadata_df = pd.read_csv(ftp_url, sep=None)
+        # Clean the filename path
+        metadata_df["filename"] = metadata_df["filename"].apply(lambda x: os.path.basename(x))
 
         files_df["fullfilename"] = files_df["filename"]
         files_df["filename"] = files_df["filename"].apply(lambda x: os.path.basename(x))
