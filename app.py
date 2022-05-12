@@ -188,6 +188,7 @@ DASHBOARD = [
                 row_selectable='multi',
                 page_size=10,
                 filter_action="native",
+                sort_action='native',
                 export_format="xlsx"
             ),
             html.Br(),
@@ -202,6 +203,7 @@ DASHBOARD = [
                 row_selectable='multi',
                 page_size= 10,
                 filter_action="native",
+                sort_action='native',
                 export_format="xlsx"
             ),
             html.Br(),
