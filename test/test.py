@@ -11,6 +11,12 @@ def test_msv():
     accession = "MSV000086873"
     dataset_files_df = utils.get_dataset_files(accession, "REDU")
 
+def test_msv_massive_metadata():
+    accession = "MSV000089459"
+    metadata_option = "f.MSV000089459/metadata/Metadata_Amulya_QE.tsv"
+    dataset_files_df = utils.get_dataset_files(accession, "MASSIVE", metadata_option=metadata_option)
+    print(dataset_files_df)
+
 def test_mtbls():
     accessions = ["MTBLS2053", "MTBLS1842"]
     for accession in accessions:
@@ -42,7 +48,7 @@ def test_gnps_fbmn():
     print(files_list)
 
 def main():
-    test_gnps_fbmn()
+    test_msv_massive_metadata()
 
 if __name__ == "__main__":
     main()
