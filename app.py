@@ -50,7 +50,8 @@ NAVBAR = dbc.Navbar(
     children=[
         dbc.NavbarBrand(
             html.Img(src="https://gnps-cytoscape.ucsd.edu/static/img/GNPS_logo.png", width="120px"),
-            href="https://gnps.ucsd.edu"
+            href="https://gnps.ucsd.edu",
+            className="ms-2"
         ),
         dbc.Nav(
             [
@@ -72,14 +73,14 @@ DASHBOARD = [
             html.Br(),
             dbc.InputGroup(
                 [
-                    dbc.InputGroupAddon("GNPS/Metabolights/PX Dataset Accession", addon_type="prepend"),
+                    dbc.InputGroupText("GNPS/Metabolights/PX Dataset Accession"),
                     dbc.Input(id='dataset_accession', placeholder="Enter Dataset ID"),
                 ],
                 className="mb-3",
             ),
             dbc.InputGroup(
                 [
-                    dbc.InputGroupAddon("Dataset Password (if private MSV) - Beta Feature", addon_type="prepend"),
+                    dbc.InputGroupText("Dataset Password (if private MSV) - Beta Feature"),
                     dbc.Input(id='dataset_password', placeholder="Enter Dataset Password", type="password", value=""),
                 ],
                 className="mb-3",
@@ -87,7 +88,7 @@ DASHBOARD = [
             html.Br(),
             dbc.Row([
                 dbc.Col(
-                    dbc.FormGroup(
+                    dbc.Row(
                         [
                             dbc.Label("Metadata Source", width=4.8, style={"width":"180px"}),
                             dcc.Dropdown(
@@ -104,7 +105,6 @@ DASHBOARD = [
                                 }
                             )
                         ],
-                        row=True,
                         className="mb-3",
                     ),
                     style={
@@ -112,7 +112,7 @@ DASHBOARD = [
                         }
                     ),
                 dbc.Col(
-                    dbc.FormGroup(
+                    dbc.Row(
                         [
                             dbc.Label("Page Size", width=4.8, style={"width":"100px"}),
                             dcc.Dropdown(
@@ -130,7 +130,6 @@ DASHBOARD = [
                                 }
                             )
                         ],
-                        row=True,
                         className="mb-3",
                     ),
                     style={
@@ -140,7 +139,7 @@ DASHBOARD = [
             ]),
             dbc.Row([
                 dbc.Col(
-                    dbc.FormGroup(
+                    dbc.Row(
                         [
                             dbc.Label("Metadata Options", width=4.8, style={"width":"180px"}),
                             dcc.Dropdown(
@@ -154,7 +153,6 @@ DASHBOARD = [
                                 }
                             )
                         ],
-                        row=True,
                         className="mb-3",
                     ),
                     style={
