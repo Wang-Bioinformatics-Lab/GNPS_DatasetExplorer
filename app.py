@@ -240,16 +240,38 @@ DASHBOARD = [
     )
 ]
 
+CONTRIBUTORS_DASHBOARD = [
+    dbc.CardHeader(html.H5("Contributors")),
+    dbc.CardBody(
+        [
+            "Mingxun Wang PhD - UC Riverside",
+            html.Br(),
+            html.Br(),
+            html.H5("Citation"),
+            html.A('Mingxun Wang, Jeremy J. Carver, Vanessa V. Phelan, Laura M. Sanchez, Neha Garg, Yao Peng, Don Duy Nguyen et al. "Sharing and community curation of mass spectrometry data with Global Natural Products Social Molecular Networking." Nature biotechnology 34, no. 8 (2016): 828. PMID: 27504778', 
+                    href="https://www.nature.com/articles/nbt.3597"),
+            html.Br(),
+            html.Br(),
+            html.A('Checkout our other work!', 
+                href="https://www.cs.ucr.edu/~mingxunw/")
+        ]
+    )
+]
+
 BODY = dbc.Container(
     [
         dbc.Row([
-            dbc.Col(
-                dbc.Card(DASHBOARD)
-            ),
+            dbc.Col([
+                dbc.Card(DASHBOARD),
+                html.Br(),
+                dbc.Card(CONTRIBUTORS_DASHBOARD)
+            ]),
         ], style={"marginTop": 30}),
     ],
     className="mt-12",
 )
+
+
 
 app.layout = html.Div(children=[NAVBAR, BODY])
 
@@ -409,7 +431,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
 
     total_file_count = len(usi_list1) + len(usi_list2)
 
-    url_provenance = dbc.Button("Visualize {} Files".format(total_file_count), color="primary", className="mr-1")
+    url_provenance = dbc.Button("Visualize {} Files".format(total_file_count), color="primary", className="me-1")
     link_selected_object = dcc.Link(url_provenance, href="https://gnps-lcms.ucsd.edu/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
 
     # Selecting the max of all files
@@ -423,7 +445,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     url_params["usi"] = "\n".join(all_usi_list1)
     url_params["usi2"] = "\n".join(all_usi_list2)
 
-    link_all = dbc.Button("Visualize All Filtered {} Files (24 max each)".format(len(all_usi_list1) + len(all_usi_list2)), color="primary", className="mr-1")
+    link_all = dbc.Button("Visualize All Filtered {} Files (24 max each)".format(len(all_usi_list1) + len(all_usi_list2)), color="primary", className="me-1")
     link_all_object = dcc.Link(link_all, href="https://gnps-lcms.ucsd.edu/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
 
     # Button for networking
@@ -437,7 +459,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     gnps_url = "https://gnps.ucsd.edu/ProteoSAFe/index.jsp?params="
     gnps_url = gnps_url + urllib.parse.quote(json.dumps(parameters))
 
-    networking_button = dbc.Button("Molecular Network {} Files at GNPS".format(len(gnps_file_list1) + len(gnps_file_list2)), color="primary", className="mr-1")
+    networking_button = dbc.Button("Molecular Network {} Files at GNPS".format(len(gnps_file_list1) + len(gnps_file_list2)), color="primary", className="me-1")
     networking_link = dcc.Link(networking_button, href=gnps_url, target="_blank")
 
     gnps_file_list1 = _determine_gnps_list(accession, file_table_data, selected_table_data, get_all=True)
@@ -449,7 +471,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     gnps_url = "https://gnps.ucsd.edu/ProteoSAFe/index.jsp?params="
     gnps_url = gnps_url + urllib.parse.quote(json.dumps(parameters))
 
-    networking_all_button = dbc.Button("Molecular Network All {} Files at GNPS".format(len(gnps_file_list1) + len(gnps_file_list2)), color="primary", className="mr-1")
+    networking_all_button = dbc.Button("Molecular Network All {} Files at GNPS".format(len(gnps_file_list1) + len(gnps_file_list2)), color="primary", className="me-1")
     networking_all_link = dcc.Link(networking_all_button, href=gnps_url, target="_blank")
 
     # Downloading file link
@@ -458,7 +480,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
             selected_data_list = _determine_row_selection_list(file_table_data, selected_table_data)
 
             download_url = "https://gnps-external.ucsd.edu/massiveftpproxy?ftppath=" + os.path.join(accession, selected_data_list[0]["filename"])
-            download_button = dbc.Button("Download First Selected File", color="primary", className="mr-1")
+            download_button = dbc.Button("Download First Selected File", color="primary", className="me-1")
             download_link = dcc.Link(download_button, href=download_url, target="_blank")
         else:
             download_link = html.Br()    
