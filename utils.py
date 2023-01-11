@@ -126,14 +126,31 @@ def _get_gnps_task_information(accession):
 def _get_massive_files(dataset_accession, dataset_password=""):
     all_files_df = pd.DataFrame()
 
+    # Trying to use the file cache
     try:
         all_files_df = _get_massive_files_cached(dataset_accession)
     except:
         pass
 
+    # Trying to use the HTTPS endpoint
+    if len(all_files_df) == 0:
+        try:
+            from gnpsdata import publicdata
+            all_files = publicdata.get_massive_public_dataset_filelist(dataset_accession)
+
+            acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw"]
+
+            all_files = [fileobj for fileobj in all_files if os.path.splitext(fileobj["file_descriptor"])[1].lower() in acceptable_extensions]
+
+            all_files_df = pd.DataFrame(all_files)
+            all_files_df["filepath"] = all_files_df["file_descriptor"].apply(lambda x: x.replace("f.", ""))
+
+        except:
+            pass
+
     if len(all_files_df) == 0:
         all_files_df = _get_massive_files_ftp(dataset_accession, dataset_password=dataset_password)
-        
+
     all_files_df["filepath"] = all_files_df["filepath"].apply(lambda x: x.replace(dataset_accession + "/", "") )
     
     files_df = pd.DataFrame()
@@ -142,6 +159,8 @@ def _get_massive_files(dataset_accession, dataset_password=""):
     # Adding more information if possible
     if "collection" in all_files_df:
         files_df["collection"] = all_files_df["collection"]
+        
+    if "update_name" in all_files_df:
         files_df["update_name"] = all_files_df["update_name"]
 
     if "size_mb" in all_files_df:
