@@ -368,6 +368,7 @@ def _determine_usi_list(accession, file_table_data, selected_table_data, get_all
 
     return usi_list
 
+
 def _determine_gnps_list(accession, file_table_data, selected_table_data, get_all=False):
     file_list = []
 
@@ -462,6 +463,15 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     networking_button = dbc.Button("Molecular Network {} Files at GNPS".format(len(gnps_file_list1) + len(gnps_file_list2)), color="primary", className="me-1")
     networking_link = dcc.Link(networking_button, href=gnps_url, target="_blank")
 
+    # Creating the set of USIs in text area
+    unique_selected_usis = set(usi_list1 + usi_list2)
+    usi_textarea = dcc.Textarea(
+        id='usi-textarea',
+        value="\n".join(unique_selected_usis),
+        style={'width': '100%', 'height': 300},
+        readOnly=True
+    )
+
     gnps_file_list1 = _determine_gnps_list(accession, file_table_data, selected_table_data, get_all=True)
     gnps_file_list2 = _determine_gnps_list(accession, file_table_data2, selected_table_data2, get_all=True)
 
@@ -502,7 +512,9 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
             networking_link, 
             networking_all_link,
             html.Hr(),
-            download_link
+            download_link,
+            html.Hr(),
+            usi_textarea
         ]
     ]
 
