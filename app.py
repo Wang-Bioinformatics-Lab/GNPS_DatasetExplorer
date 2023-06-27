@@ -432,8 +432,8 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
 
     total_file_count = len(usi_list1) + len(usi_list2)
 
-    url_provenance = dbc.Button("Visualize {} Files".format(total_file_count), color="primary", className="me-1")
-    link_selected_object = dcc.Link(url_provenance, href="https://gnps-lcms.ucsd.edu/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
+    url_provenance = dbc.Button("Visualize {} Files in GNPS2 Dashboard".format(total_file_count), color="primary", className="me-1")
+    link_selected_object = dcc.Link(url_provenance, href="https://dashboard.gnps2.org/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
 
     # Selecting the max of all files
     all_usi_list1 = _determine_usi_list(accession, file_table_data, selected_table_data, get_all=True, private=is_private)
@@ -446,8 +446,8 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     url_params["usi"] = "\n".join(all_usi_list1)
     url_params["usi2"] = "\n".join(all_usi_list2)
 
-    link_all = dbc.Button("Visualize All Filtered {} Files (24 max each)".format(len(all_usi_list1) + len(all_usi_list2)), color="primary", className="me-1")
-    link_all_object = dcc.Link(link_all, href="https://gnps-lcms.ucsd.edu/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
+    link_all = dbc.Button("Visualize All Filtered {} Files (24 max each) in GNPS2 Dashboard".format(len(all_usi_list1) + len(all_usi_list2)), color="primary", className="me-1")
+    link_all_object = dcc.Link(link_all, href="https://dashboard.gnps2.org/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
 
     # Button for networking
     gnps_file_list1 = _determine_gnps_list(accession, file_table_data, selected_table_data)
