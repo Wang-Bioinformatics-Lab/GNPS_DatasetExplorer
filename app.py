@@ -66,7 +66,7 @@ NAVBAR = dbc.Navbar(
 )
 
 DASHBOARD = [
-    dbc.CardHeader(html.H5("GNPS Dataset Dashboard - Version - 0.4")),
+    dbc.CardHeader(html.H5("GNPS2 Dataset Dashboard - Version - 0.4")),
     dbc.CardBody(
         [   
             dcc.Location(id='url', refresh=False),
@@ -556,7 +556,7 @@ def list_files(accession, dataset_password, metadata_source, metadata_option):
             continue
         columns.append({"name": column, "id": column})
 
-    file_summary = html.Div("This dataset contains {} files that can be viewed by GNPS Dashboard or other GNPS Tools (i.e. mzML, mzXML, .mgf, .raw files)".format(len(files_df)))
+    file_summary = html.Div("This dataset contains {} files that can be viewed by GNPS2 Dashboard or other GNPS Tools (i.e. mzML, mzXML, .mgf, .raw files)".format(len(files_df)))
 
     return [[file_summary], files_df.to_dict(orient="records"), columns, files_df.to_dict(orient="records"), columns]
 
