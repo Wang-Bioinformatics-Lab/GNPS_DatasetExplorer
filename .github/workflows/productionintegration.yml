@@ -7,7 +7,7 @@ on:
    - cron:  '29 * * * *'
 
 jobs:
-  build:
+  test-integration:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
