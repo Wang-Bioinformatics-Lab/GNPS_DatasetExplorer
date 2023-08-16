@@ -22,7 +22,7 @@ import utils
 
 server = Flask(__name__)
 app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.BOOTSTRAP])
-app.title = 'GNPS - Dataset Browser'
+app.title = 'GNPS2 - Dataset Browser'
 
 # Optionally turn on caching
 if __name__ == "__main__":
