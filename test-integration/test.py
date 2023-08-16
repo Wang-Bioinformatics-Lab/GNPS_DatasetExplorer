@@ -7,7 +7,12 @@ def test_dataset():
     r = requests.get(url)
 
     print(r.json())
-    
+
+    r.raise_for_status()
+
+def test_interface():
+    url = SERVER_URL
+    r = requests.get(url)
     r.raise_for_status()
 
 def main():
