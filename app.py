@@ -49,8 +49,8 @@ server = app.server
 NAVBAR = dbc.Navbar(
     children=[
         dbc.NavbarBrand(
-            html.Img(src="https://gnps-cytoscape.ucsd.edu/static/img/GNPS_logo.png", width="120px"),
-            href="https://gnps.ucsd.edu",
+            html.Img(src="https://gnps2.org/static/img/logo.png", width="120px"),
+            href="https://gnps2.org",
             className="ms-2"
         ),
         dbc.Nav(
