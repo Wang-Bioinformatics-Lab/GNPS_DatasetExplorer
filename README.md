@@ -4,6 +4,4 @@ We typitcally will deploy this locally. To bring everything up
 
 ```server-compose```
 
-### Heroku Deployment
-
-We are also trying to support a heroku deployment. This is why we have a Procfile. 
+[![production-integration](https://github.com/mwang87/GNPS_DatasetExplorer/actions/workflows/productionintegration.yml/badge.svg)](https://github.com/mwang87/GNPS_DatasetExplorer/actions/workflows/productionintegration.yml)
