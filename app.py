@@ -504,10 +504,10 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     gnps2_parameters["usi"] = "\n".join(usi_list1)
     gnps2_parameters["description"] = "USI Molecular Networking Analysis"
 
-    gnps2_url = gnps2_url + "#" + urllib.parse.quote(json.dumps(gnps2_parameters))
+    gnps2_updated_url = gnps2_url + "#" + urllib.parse.quote(json.dumps(gnps2_parameters))
 
     gnps2_selected_networking_button = dbc.Button("Molecular Network Selected {} Files at GNPS2".format(len(usi_list1)), color="primary", className="me-1")
-    gnps2_selected_networking_link = dcc.Link(gnps2_selected_networking_button, href=gnps2_url, target="_blank")    
+    gnps2_selected_networking_link = dcc.Link(gnps2_selected_networking_button, href=gnps2_updated_url, target="_blank")    
 
     # All USIs
     gnps2_parameters = {}
@@ -515,10 +515,10 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     gnps2_parameters["description"] = "USI Molecular Networking Analysis"
 
     # Writing parameters as a hash
-    gnps2_url = gnps2_url + "#" + urllib.parse.quote(json.dumps(gnps2_parameters))
+    gnps2_updated_url = gnps2_url + "#" + urllib.parse.quote(json.dumps(gnps2_parameters))
 
     gnps2_all_networking_button = dbc.Button("Molecular Network All {} Files at GNPS2".format(len(all_usi_list1)), color="primary", className="me-1")
-    gnps2_all_networking_link = dcc.Link(gnps2_all_networking_button, href=gnps2_url, target="_blank")    
+    gnps2_all_networking_link = dcc.Link(gnps2_all_networking_button, href=gnps2_updated_url, target="_blank")    
 
 
 
