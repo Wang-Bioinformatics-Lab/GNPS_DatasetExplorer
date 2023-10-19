@@ -463,15 +463,6 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     networking_button = dbc.Button("Molecular Network {} Files at GNPS".format(len(gnps_file_list1) + len(gnps_file_list2)), color="primary", className="me-1")
     networking_link = dcc.Link(networking_button, href=gnps_url, target="_blank")
 
-    # Creating the set of USIs in text area
-    unique_selected_usis = set(usi_list1 + usi_list2)
-    usi_textarea = dcc.Textarea(
-        id='usi-textarea',
-        value="\n".join(unique_selected_usis),
-        style={'width': '100%', 'height': 300},
-        readOnly=True
-    )
-
     gnps_file_list1 = _determine_gnps_list(accession, file_table_data, selected_table_data, get_all=True)
     gnps_file_list2 = _determine_gnps_list(accession, file_table_data2, selected_table_data2, get_all=True)
 
@@ -484,6 +475,54 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     networking_all_button = dbc.Button("Molecular Network All {} Files at GNPS".format(len(gnps_file_list1) + len(gnps_file_list2)), color="primary", className="me-1")
     networking_all_link = dcc.Link(networking_all_button, href=gnps_url, target="_blank")
 
+    # Creating the set of USIs in text area
+    unique_selected_usis = set(usi_list1 + usi_list2)
+    usi_textarea = dcc.Textarea(
+        id='usi-textarea',
+        value="\n".join(unique_selected_usis),
+        style={'width': '100%', 'height': 300},
+        readOnly=True
+    )
+
+    # Create a set of USIs for all files in a text area
+    unique_all_usis = set(all_usi_list1 + all_usi_list2)
+    usi_textarea_all = dcc.Textarea(
+        id='usi-textarea-all',
+        value="\n".join(unique_all_usis),
+        style={'width': '100%', 'height': 300},
+        readOnly=True
+    )
+
+
+    
+
+    # Here we will have the GNPS2 analysis urls
+    gnps2_url = "https://gnps2.org/workflowinput?workflowname=classical_networking_workflow"
+
+    # For selected GNPS2 USIs
+    gnps2_parameters = {}
+    gnps2_parameters["usi"] = "\n".join(usi_list1)
+    gnps2_parameters["description"] = "USI Molecular Networking Analysis"
+
+    gnps2_url = gnps2_url + "#" + urllib.parse.quote(json.dumps(gnps2_parameters))
+
+    gnps2_selected_networking_button = dbc.Button("Molecular Network Selected {} Files at GNPS2".format(len(usi_list1)), color="primary", className="me-1")
+    gnps2_selected_networking_link = dcc.Link(gnps2_selected_networking_button, href=gnps2_url, target="_blank")    
+
+    # All USIs
+    gnps2_parameters = {}
+    gnps2_parameters["usi"] = "\n".join(all_usi_list1)
+    gnps2_parameters["description"] = "USI Molecular Networking Analysis"
+
+    # Writing parameters as a hash
+    gnps2_url = gnps2_url + "#" + urllib.parse.quote(json.dumps(gnps2_parameters))
+
+    gnps2_all_networking_button = dbc.Button("Molecular Network All {} Files at GNPS2".format(len(all_usi_list1)), color="primary", className="me-1")
+    gnps2_all_networking_link = dcc.Link(gnps2_all_networking_button, href=gnps2_url, target="_blank")    
+
+
+
+
     # Downloading file link
     if len(usi_list1) > 0:
         if "MSV" in accession:
@@ -493,7 +532,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
             download_button = dbc.Button("Download First Selected File", color="primary", className="me-1")
             download_link = dcc.Link(download_button, href=download_url, target="_blank")
         else:
-            download_link = html.Br()    
+            download_link = html.Br()
     else:
         download_link = html.Br()
 
@@ -509,12 +548,19 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
             html.Br(), 
             link_selected_object, link_all_object,
             html.Hr(),
+            gnps2_selected_networking_link,
+            gnps2_all_networking_link,
+            html.Hr(),
             networking_link, 
             networking_all_link,
             html.Hr(),
             download_link,
+            html.H3("Selected USIs for Dataset"),
             html.Hr(),
-            usi_textarea
+            usi_textarea,
+            html.Hr(),
+            html.H3("All USIs for Dataset"),
+            usi_textarea_all
         ]
     ]
 
