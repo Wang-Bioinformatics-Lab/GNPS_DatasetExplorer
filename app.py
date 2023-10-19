@@ -235,7 +235,9 @@ DASHBOARD = [
             html.Br(),
             html.A("GNPS Analysis Task", href="/1ad7bc366aef45ce81d2dfcca0a9a5e7"),
             html.Br(),
-            html.A("Zenodo Dataset", href="/ZENODO-4989929")
+            html.A("Zenodo Dataset", href="/ZENODO-8338511")
+            html.Br(),
+            html.A("Zenodo Dataset (with Zip Files)", href="/ZENODO-4989929"),
         ]
     )
 ]
