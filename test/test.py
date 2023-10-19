@@ -34,12 +34,15 @@ def test_pride():
         utils.get_dataset_description(accession)
 
 def test_workbench():
-    accessions = ["ST001709", ""]
+    accessions = ["ST001709"]
+
+    for accession in accessions:
+        all_files = utils.get_dataset_files(accession, "")
+        print(all_files)
 
 def test_zenodo():
     accessions = ["ZENODO-4989929", "ZENODO-8338511"]
     
-
     for accession in accessions:
         all_files = utils.get_dataset_files(accession, "")
         print(all_files)
@@ -52,7 +55,8 @@ def test_gnps_fbmn():
 
 def main():
     #test_msv_massive_metadata()
-    test_zenodo()
+    #test_zenodo()
+    test_workbench()
 
 if __name__ == "__main__":
     main()
