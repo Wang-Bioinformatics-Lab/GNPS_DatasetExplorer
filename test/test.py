@@ -3,6 +3,7 @@ import os
 sys.path.insert(0, "..")
 import utils
 import metabolights
+import zenodo
 
 def test_msv():
     #accession = "MSV000086206"
@@ -39,7 +40,8 @@ def test_zenodo():
     accessions = ["ZENODO-4989929"]
 
     for accession in accessions:
-        utils.get_dataset_files(accession, "")
+        all_files = utils.get_dataset_files(accession, "")
+        print(all_files)
 
 def test_gnps_fbmn():
     task = "9c8d2902db494db39a292c13cf442dac"
@@ -48,7 +50,8 @@ def test_gnps_fbmn():
     print(files_list)
 
 def main():
-    test_msv_massive_metadata()
+    #test_msv_massive_metadata()
+    test_zenodo()
 
 if __name__ == "__main__":
     main()
