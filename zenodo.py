@@ -37,3 +37,15 @@ def _get_zenodo_files(dataset_accession):
                         all_filenames.append("{}-{}".format(zip_filename, actual_filename))
 
     return all_filenames
+
+def _get_zenodo_dataset_information(dataset_accession):
+    zenodo_id = dataset_accession.replace("ZENODO", "").replace("-", "")
+
+    zenodo_url = "https://zenodo.org/api/records/{}".format(zenodo_id)
+
+    dataset_information = requests.get(zenodo_url).json()
+
+    title = dataset_information["metadata"]["title"]
+    description = dataset_information["metadata"]["description"]
+
+    return title, description

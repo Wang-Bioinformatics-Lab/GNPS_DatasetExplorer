@@ -89,6 +89,9 @@ def get_dataset_description(accession):
     if "ST" in accession:
         dataset_title, dataset_description = workbench._get_metabolomicsworkbench_dataset_information(accession)
 
+    if "ZENODO" in accession:
+        dataset_title, dataset_description = zenodo._get_zenodo_dataset_information(accession)
+
     elif len(accession) == 32:
         # We're likely looking at a uuid from GNPS, lets hit the API
         dataset_title, dataset_description = _get_gnps_task_information(accession)
