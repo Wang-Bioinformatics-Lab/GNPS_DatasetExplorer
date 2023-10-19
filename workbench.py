@@ -1,4 +1,6 @@
+import os
 import requests
+import pandas as pd
 
 def _get_metabolomicsworkbench_dataset_information(dataset_accession):
     metabolomics_workbench_data = requests.get("https://www.metabolomicsworkbench.org/rest/study/study_id/{}/summary".format(dataset_accession)).json()
@@ -21,6 +23,4 @@ def _get_metabolomicsworkbench_files(dataset_accession):
     except:
         workbench_df = pd.DataFrame()
     
-    merged_df = pd.concat([files_df, workbench_df])
-
-    return merged_df
+    return workbench_df
