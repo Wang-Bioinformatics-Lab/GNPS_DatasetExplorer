@@ -37,7 +37,8 @@ def test_workbench():
     accessions = ["ST001709", ""]
 
 def test_zenodo():
-    accessions = ["ZENODO-4989929"]
+    accessions = ["ZENODO-4989929", "ZENODO-8338511"]
+    
 
     for accession in accessions:
         all_files = utils.get_dataset_files(accession, "")
