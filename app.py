@@ -439,6 +439,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
 
     # Selecting the max of all files
     all_usi_list1 = _determine_usi_list(accession, file_table_data, selected_table_data, get_all=True, private=is_private)
+    all_usi_list1_complete = all_usi_list1
     all_usi_list1 = all_usi_list1[:50] # Lets limit to 24 here
 
     all_usi_list2 = _determine_usi_list(accession, file_table_data2, selected_table_data2, get_all=True, private=is_private)
@@ -487,7 +488,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     )
 
     # Create a set of USIs for all files in a text area
-    unique_all_usis = set(all_usi_list1 + all_usi_list2)
+    unique_all_usis = set(all_usi_list1_complete)
     usi_textarea_all = dcc.Textarea(
         id='usi-textarea-all',
         value="\n".join(unique_all_usis),
