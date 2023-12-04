@@ -5,6 +5,9 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: gnpsdatasetchooser-dash
+        image: gnpsdatasetchooser-dash:latest
+        build:
+            context.
     volumes:
       - ./logs:/app/logs:rw
     ports:
