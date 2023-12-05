@@ -70,7 +70,23 @@ NAVBAR = dbc.Navbar(
     dark=False,
     sticky="top",
 )
+server_dropdown_1 = dcc.Dropdown(
+    id='server-dropdown-1',
+    options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
+    style={'width': '300px', 'color': 'black', 'cursor':'default', 'font-weight': 'bold', 'z-index': 1000, 'opacity': 1},
+    value='us',
+    searchable=False,
+    
+)
 
+server_dropdown_2 = dcc.Dropdown(
+    id='server-dropdown-2',
+    options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
+    style={'width': '300px', 'color': 'black', 'cursor':'default', 'font-weight': 'bold', 'z-index': 1000, 'opacity': 1},
+    value='us',
+    searchable=False,
+    
+)
 DASHBOARD = [
     dbc.CardHeader(html.H5("GNPS2 Dataset Dashboard - Version - 0.4")),
     dbc.CardBody(
@@ -212,49 +228,110 @@ DASHBOARD = [
             ),
             html.Br(),
 
-            dcc.Loading(
-                id="link-button",
-                children=[html.Div([html.Div(id="loading-output-9"),
-                                    dcc.Dropdown(id='server-dropdown',
-                            options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
-                            placeholder='Select Server: ',  # Set the default value to 'US Server'
-                            #style=server_dropdown_style,
-                            searchable=False,),],
-            )
-            ],
-                type="default",
-            ),
+            # html.Div(
+            #     dbc.Row(
+            #         [dbc.Col(html.Div([dcc.Loading(
+            #                                     id="link-button",
+            #                                     children=[html.Div([html.Div(id="loading-output-9"),
+            #                                                       ],
+            #                                                     )
+            #                                             ],
+            #                                     type="default",
+            #                 ),
+            #                 dbc.Col(html.Div(dcc.Dropdown(
+            #                                         id='server-dropdown',
+            #                                         options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
+            #                                         #placeholder='Select Server: ',  # Set the default value to 'US Server'
+            #                                         style={'width': '300px', 'color': 'black', 'cursor':'default',
+            #                                                             'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 
+            #                                                             },
+            #                                         value = 'us',
+            #                                         searchable=False,
+        
+            #                                     )))
+            #                                     ])),
+                    # dbc.Col(html.Div( dcc.Dropdown(
+                    #                                 id='server-dropdown',
+                    #                                 options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
+                    #                                 #placeholder='Select Server: ',  # Set the default value to 'US Server'
+                    #                                 style={'width': '300px', 'color': 'black', 'cursor':'default',
+                    #                                                     'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 
+                    #                                                     },
+                    #                                 value = 'us',
+                    #                                 searchable=False,
+        
+                    #                             ),))
+            #         ]
 
-            # dcc.Loading(id='link-button',
-            #             children=[dcc.Dropdown(id="server-dropdown",
-            #                              options=[{'label':'USA-UCR', 'value':'us'}, {'label': 'De-Tue'}],
-            #                              placeholder="Select Server: ",
-            #                              searchable=False,),
-            #                             html.Div(id="loading-output-9"),
-            #                             ]
-            #             type=default,
-            #                             )
+            #     )
+            # ),
+           
 
             
 
+            # html.Div(dcc.Dropdown(
+            #                                         id='server-dropdown-1',
+            #                                         options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
+            #                                         #placeholder='Select Server: ',  # Set the default value to 'US Server'
+            #                                         style={'width': '300px', 'color': 'black', 'cursor':'default',
+            #                                                             'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 
+            #                                                             },
+            #                                         value = 'us',
+            #                                         searchable=False,
+        
+            #                                     )),
+            
+            # html.Div(dcc.Dropdown(
+            #                                         id='server-dropdown-2',
+            #                                         options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
+            #                                         #placeholder='Select Server: ',  # Set the default value to 'US Server'
+            #                                         style={'width': '300px', 'color': 'black', 'cursor':'default',
+            #                                                             'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 
+            #                                                             },
+            #                                         value = 'us',
+            #                                         searchable=False,
+        
+            #                                     )),
 
 
-            # dbc.Row(
-            #     [dbc.Col(dcc.Loading(
-            #                 id="link-button",
-            #                 children=[html.Div([html.Div(id="loading-output-9")
-            #                                     ])],
-            #                 type="default",),
-                            
-            #                 ),           
-            #     dbc.Col(dcc.Dropdown(id='server-dropdown',
-            #                             options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
-            #                             placeholder='Select Server: ',  # Set the default value to 'US Server'
-            #                             #style=server_dropdown_style,
-            #                             searchable=False)
-            #                 )]
-            #         ),
+            dcc.Loading(
+                id="link-button",
+                children=[html.Div([html.Div(id="loading-output-9"),
+                                    ],
+                                )
+                        ],
+                type="default",
+            ),
 
+
+            
+
+            
+                        # dcc.Loading(
+                        #     id="link-button",
+                        #     type="default",
+                        #     children=[
+                        #         html.Div(id="loading-output-9"),
+                        #         html.Div(dcc.Dropdown(
+                        #             id='server-dropdown',
+                        #             options=[
+                        #                 {'label': 'USA-UCR', 'value': 'us'},
+                        #                 {'label': 'De-Tue', 'value': 'de'}
+                        #             ],
+                        #             placeholder='Select Server: ',
+                        #             style={
+                        #                 'width': '150px',
+                        #                 'color': 'black',
+                        #                 'cursor': 'default',
+                        #                 'font-weight': 'bold',
+                        #                 'z-index': 1000,
+                        #                 'opacity': 1,
+                        #             },
+                        #             searchable=False,
+                        #         ),)
+                        #     ],
+                        # ),
+            
 
             html.Hr(),
 
@@ -451,39 +528,52 @@ def _determine_row_selection_list(file_table_data, selected_table_data, get_all=
         return output_list
     
 
-    
-# Callback to update loading-output-9 without depending on server-dropdown
+# @app.callback(
+#     Output('dash', 'href'),
+#     Output('dash-all', 'href'),
+#     Output('network', 'href'),
+#     Output('network-all', 'href'),
+#     [Input('server-dropdown', 'value')]
+# )
+# def update_links(selected_server):
+#     google_url = 'https://www.google.com'
+#     example1_url = 'https://www.google.com'
+#     example2_url = 'https://www.google.de'
+#     example3_url = 'https://www.google.de'
 
-# def update_loading_output_and_links(accession, dataset_password, file_table_data, selected_table_data,
-#                                     file_table_data2, selected_table_data2, selected_server):
-#     # Update loading output based on dataset values
-#     loading_output = None  # or some loading message
+#     if selected_server == 'us':
+#         return google_url, example1_url, example2_url, example3_url
+#     elif selected_server == 'de':
+#         # Replace with the URLs for the German server
+#         return google_url, example1_url, example2_url, example3_url 
 
-#     # Update link-button children based on selected server
-#     links_children = create_link(accession, dataset_password, file_table_data, selected_table_data,
-#                                  file_table_data2, selected_table_data2, selected_server)
-
-#     return loading_output, links_children
 def get_link(name,url, selected_server):
-
+    placeholder = None
     if selected_server == "de":
-        placeholder =  dcc.Link(name,href= 'https://google.com', target="_blank")
+        placeholder =  dcc.Link(name,href= "https://google.com", target="_blank")
 
-    elif selected_server == "us":
+    else:
         placeholder = dcc.Link(name,href=url,target="_blank")   
+
     return placeholder 
+
+
+
+
 
 @app.callback([   
                   Output('link-button', 'children'),
               ],
-              [
+              [   
                   Input('dataset_accession', 'value'), 
                   Input('dataset_password', 'value'), 
                   Input('file-table', 'derived_virtual_data'),
                   Input('file-table', 'derived_virtual_selected_rows'),
                   Input('file-table2', 'derived_virtual_data'),
                   Input('file-table2', 'derived_virtual_selected_rows'),
-                  Input('server-dropdown', 'value')
+                  Input('server-dropdown-1', 'value'),
+                  Input('server-dropdown-2', 'value'),
+                  
               ])
 
 def create_link(accession, dataset_password, file_table_data, selected_table_data, file_table_data2, selected_table_data2,selected_server):
@@ -491,23 +581,6 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     is_private = False
     if len(dataset_password) > 0:
         is_private = True
-
-    
-    server_dropdown_style = {'width': '150px', 'color': 'black', 'cursor':'default',
-                            'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 
-                            }
-
-
-    server_dropdown = dcc.Dropdown(
-        id='server-dropdown',
-        options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
-        placeholder='Select Server: ',  # Set the default value to 'US Server'
-        style=server_dropdown_style,
-        searchable=False,
-        
-    )
-
-
 
     usi_list1 = _determine_usi_list(accession, file_table_data, selected_table_data, private=is_private)
     usi_list2 = _determine_usi_list(accession, file_table_data2, selected_table_data2, private=is_private)
@@ -528,13 +601,11 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     url_provenance_us = dbc.Button("Visualize {} Files in GNPS2 Dashboard".format(total_file_count), color="primary", className="me-1")
     link_selected_object = get_link(url_provenance_us,dashboard_url, selected_server)
 
+
     # link_selected_object = dcc.Link(url_provenance_us, href="https://dashboard.gnps2.org/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
 
     # url_provenance_de = dbc.Button("Visualize {} Files in GNPS2 Dashboard".format(total_file_count), color="primary", className="me-1")
     # link_selected_object = dcc.Link(url_provenance_de, href="https://google.com/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
-    
-        
-
     # Selecting the max of all files
     all_usi_list1 = _determine_usi_list(accession, file_table_data, selected_table_data, get_all=True, private=is_private)
     all_usi_list1_complete = all_usi_list1
@@ -549,7 +620,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
 
 
     link_all = dbc.Button("Visualize All Filtered {} Files (24 max each) in GNPS2 Dashboard".format(len(all_usi_list1) + len(all_usi_list2)), color="primary", className="me-1")
-    link_all_object = dcc.Link(link_all, href=  dashboard_url, target="_blank")
+    link_all_object = get_link(link_all, dashboard_url, selected_server)
     #test_all_object = dcc.Textarea(id='example', value=(url_params['usi']),)
 
 
@@ -566,7 +637,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     gnps_url = gnps_url + urllib.parse.quote(json.dumps(parameters))
 
     networking_button = dbc.Button("Molecular Network {} Files at GNPS".format(len(gnps_file_list1) + len(gnps_file_list2)), color="primary", className="me-1")
-    networking_link = dcc.Link(networking_button, href=gnps_url, target="_blank")
+    networking_link = get_link(networking_button, gnps_url, selected_server)
   
 
     gnps_file_list1 = _determine_gnps_list(accession, file_table_data, selected_table_data, get_all=True)
@@ -579,7 +650,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     gnps_url = gnps_url + urllib.parse.quote(json.dumps(parameters))
 
     networking_all_button = dbc.Button("Molecular Network All {} Files at GNPS".format(len(gnps_file_list1) + len(gnps_file_list2)), color="primary", className="me-1")
-    networking_all_link = dcc.Link(networking_all_button, href=gnps_url, target="_blank")
+    networking_all_link = get_link(networking_all_button, gnps_url, selected_server)
 
 
     # Creating the set of USIs in text area
@@ -614,7 +685,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     gnps2_updated_url = gnps2_url + "#" + urllib.parse.quote(json.dumps(gnps2_parameters))
 
     gnps2_selected_networking_button = dbc.Button("Molecular Network Selected {} Files at GNPS2".format(len(usi_list1)), color="primary", className="me-1")
-    gnps2_selected_networking_link = dcc.Link(gnps2_selected_networking_button, href=gnps2_updated_url, target="_blank")    
+    gnps2_selected_networking_link = get_link(gnps2_selected_networking_button, gnps2_updated_url, selected_server)    
 
     # All USIs
     gnps2_parameters = {}
@@ -625,7 +696,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     gnps2_updated_url = gnps2_url + "#" + urllib.parse.quote(json.dumps(gnps2_parameters))
 
     gnps2_all_networking_button = dbc.Button("Molecular Network All {} Files at GNPS2".format(len(all_usi_list1)), color="primary", className="me-1")
-    gnps2_all_networking_link = dcc.Link(gnps2_all_networking_button, href=gnps2_updated_url, target="_blank")    
+    gnps2_all_networking_link = get_link(gnps2_all_networking_button, gnps2_updated_url, selected_server)    
 
 
 
@@ -644,23 +715,26 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
         download_link = html.Br()
 
     # Selection Text
-    selection_text = "Selected {} Default Files and {} Comparison Files {} for LCMS Analysis".format(len(usi_list1), len(usi_list2), selected_server)
+    selection_text = "Selected {} Default Files and {} Comparison Files for LCMS Analysis".format(len(usi_list1), len(usi_list2))
 
-    links_children = [
+
+    return [
+    [
         html.Br(), 
         html.Hr(), 
         selection_text, 
         html.Br(), 
-        html.Br(), 
-        html.Div([link_selected_object]),
-        html.Div([link_selected_object, link_all_object, server_dropdown],
-                 style={'display': 'flex', 'align-items': 'center'}),
+        html.Br(),
+        html.Div([link_selected_object, link_all_object,server_dropdown_1],
+                style={'display': 'flex', 'align-items': 'center'}),
         html.Hr(),
-        html.Div([gnps2_selected_networking_link, gnps2_all_networking_link, server_dropdown],
-                 style={'display': 'flex', 'align-items': 'center'}),
+        html.Div([gnps2_selected_networking_link,
+        gnps2_all_networking_link, server_dropdown_2],
+                style={'display': 'flex', 'align-items': 'center'}),
         html.Hr(),
-        html.Div([networking_link, networking_all_link, server_dropdown],
-                 style={'display': 'flex', 'align-items': 'center'}),
+        # html.Div([networking_link, 
+        # networking_all_link],
+        #         style={'display': 'flex', 'align-items': 'center'}),
         html.Hr(),
         download_link,
         html.H3("Selected USIs for Dataset"),
@@ -670,34 +744,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
         html.H3("All USIs for Dataset"),
         usi_textarea_all
     ]
-    return [links_children]
-#     return [
-#     [
-#         html.Br(), 
-#         html.Hr(), 
-#         selection_text, 
-#         html.Br(), 
-#         html.Br(), 
-#         html.Div([link_selected_object, link_all_object],
-#                 style={'display': 'flex', 'align-items': 'center'}),
-#         html.Hr(),
-#         html.Div([gnps2_selected_networking_link,
-#         gnps2_all_networking_link, server_dropdown],
-#                 style={'display': 'flex', 'align-items': 'center'}),
-#         html.Hr(),
-#         html.Div([networking_link, 
-#         networking_all_link, server_dropdown],
-#                 style={'display': 'flex', 'align-items': 'center'}),
-#         html.Hr(),
-#         download_link,
-#         html.H3("Selected USIs for Dataset"),
-#         html.Hr(),
-#         usi_textarea,
-#         html.Hr(),
-#         html.H3("All USIs for Dataset"),
-#         usi_textarea_all
-#     ]
-# ]
+]
 
 
 
