@@ -70,23 +70,23 @@ NAVBAR = dbc.Navbar(
     dark=False,
     sticky="top",
 )
-server_dropdown_1 = dcc.Dropdown(
-    id='server-dropdown-1',
-    options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
-    style={'width': '300px', 'color': 'black', 'cursor':'default', 'font-weight': 'bold', 'z-index': 1000, 'opacity': 1},
-    value='us',
-    searchable=False,
+# server_dropdown_1 = dcc.Dropdown(
+#     id='server-dropdown-1',
+#     options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
+#     style={'width': '300px', 'color': 'black', 'cursor':'default', 'font-weight': 'bold', 'z-index': 1000, 'opacity': 1},
+#     value='us',
+#     searchable=False,
     
-)
+# )
 
-server_dropdown_2 = dcc.Dropdown(
-    id='server-dropdown-2',
-    options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
-    style={'width': '300px', 'color': 'black', 'cursor':'default', 'font-weight': 'bold', 'z-index': 1000, 'opacity': 1},
-    value='us',
-    searchable=False,
+# server_dropdown_2 = dcc.Dropdown(
+#     id='server-dropdown-2',
+#     options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
+#     style={'width': '300px', 'color': 'black', 'cursor':'default', 'font-weight': 'bold', 'z-index': 1000, 'opacity': 1},
+#     value='us',
+#     searchable=False,
     
-)
+
 DASHBOARD = [
     dbc.CardHeader(html.H5("GNPS2 Dataset Dashboard - Version - 0.4")),
     dbc.CardBody(
@@ -269,20 +269,10 @@ DASHBOARD = [
 
             
 
-            # html.Div(dcc.Dropdown(
-            #                                         id='server-dropdown-1',
-            #                                         options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
-            #                                         #placeholder='Select Server: ',  # Set the default value to 'US Server'
-            #                                         style={'width': '300px', 'color': 'black', 'cursor':'default',
-            #                                                             'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 
-            #                                                             },
-            #                                         value = 'us',
-            #                                         searchable=False,
-        
-            #                                     )),
+            
             
             # html.Div(dcc.Dropdown(
-            #                                         id='server-dropdown-2',
+            #                                         id='server-dropdown-net',
             #                                         options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
             #                                         #placeholder='Select Server: ',  # Set the default value to 'US Server'
             #                                         style={'width': '300px', 'color': 'black', 'cursor':'default',
@@ -293,14 +283,40 @@ DASHBOARD = [
         
             #                                     )),
 
-
-            dcc.Loading(
-                id="link-button",
-                children=[html.Div([html.Div(id="loading-output-9"),
-                                    ],
-                                )
-                        ],
-                type="default",
+            html.Div([
+                dcc.Loading(
+                    id="link-button",
+                    type="default",
+                    children=[html.Div(id="loading-output-9"),
+                    ],
+                ),
+                
+                html.Div([dcc.Dropdown(
+                                                        id='server-dropdown',
+                                                        options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
+                                                        placeholder='Select Server: ',  # Set the default value to 'US Server'
+                                                        style={'width': '300px', 'color': 'black', 'cursor':'default',
+                                                                            'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 
+                                                                            },
+                                                        
+                                                        searchable=False,
+            
+                                                    ),
+                dcc.Dropdown(
+                                                        id='server-dropdown-net',
+                                                        options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
+                                                        placeholder='Select Server: ',  # Set the default value to 'US Server'
+                                                        style={'width': '300px', 'color': 'black', 'cursor':'default',
+                                                                            'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 
+                                                                            },
+                                                        
+                                                        searchable=False,
+            
+                                                    )],
+                
+                
+                
+                ),]
             ),
 
 
@@ -563,6 +579,7 @@ def get_link(name,url, selected_server):
 
 @app.callback([   
                   Output('link-button', 'children'),
+                  
               ],
               [   
                   Input('dataset_accession', 'value'), 
@@ -571,12 +588,12 @@ def get_link(name,url, selected_server):
                   Input('file-table', 'derived_virtual_selected_rows'),
                   Input('file-table2', 'derived_virtual_data'),
                   Input('file-table2', 'derived_virtual_selected_rows'),
-                  Input('server-dropdown-1', 'value'),
-                  Input('server-dropdown-2', 'value'),
+                  Input('server-dropdown', 'value'),
+                  Input('server-dropdown-net', 'value'),
                   
               ])
 
-def create_link(accession, dataset_password, file_table_data, selected_table_data, file_table_data2, selected_table_data2,selected_server):
+def create_link(accession, dataset_password, file_table_data, selected_table_data, file_table_data2, selected_table_data2,selected_server,selected_net):
     
     is_private = False
     if len(dataset_password) > 0:
@@ -685,7 +702,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     gnps2_updated_url = gnps2_url + "#" + urllib.parse.quote(json.dumps(gnps2_parameters))
 
     gnps2_selected_networking_button = dbc.Button("Molecular Network Selected {} Files at GNPS2".format(len(usi_list1)), color="primary", className="me-1")
-    gnps2_selected_networking_link = get_link(gnps2_selected_networking_button, gnps2_updated_url, selected_server)    
+    gnps2_selected_networking_link = get_link(gnps2_selected_networking_button, gnps2_updated_url, selected_net)    
 
     # All USIs
     gnps2_parameters = {}
@@ -696,7 +713,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     gnps2_updated_url = gnps2_url + "#" + urllib.parse.quote(json.dumps(gnps2_parameters))
 
     gnps2_all_networking_button = dbc.Button("Molecular Network All {} Files at GNPS2".format(len(all_usi_list1)), color="primary", className="me-1")
-    gnps2_all_networking_link = get_link(gnps2_all_networking_button, gnps2_updated_url, selected_server)    
+    gnps2_all_networking_link = get_link(gnps2_all_networking_button, gnps2_updated_url, selected_net)    
 
 
 
@@ -725,16 +742,37 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
         selection_text, 
         html.Br(), 
         html.Br(),
-        html.Div([link_selected_object, link_all_object,server_dropdown_1],
+        html.Div([link_selected_object, link_all_object, dcc.Dropdown(
+                                                    id='server-dropdown',
+                                                    options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
+                                                    #placeholder='Select Server: ',  # Set the default value to 'US Server'
+                                                    style={'width': '300px', 'color': 'black', 'cursor':'default',
+                                                                        'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 
+                                                                        },
+                                                    value=selected_server,
+                                                    searchable=False,
+        
+                                                )],
                 style={'display': 'flex', 'align-items': 'center'}),
         html.Hr(),
         html.Div([gnps2_selected_networking_link,
-        gnps2_all_networking_link, server_dropdown_2],
+        gnps2_all_networking_link, dcc.Dropdown(
+                                                    id='server-dropdown-net',
+                                                    options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
+                                                    #placeholder='Select Server: ',  # Set the default value to 'US Server'
+                                                    style={'width': '300px', 'color': 'black', 'cursor':'default',
+                                                                        'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 
+                                                                        },
+                                                    value=selected_net,
+                                                    
+                                                    searchable=False,
+        
+                                                )],
                 style={'display': 'flex', 'align-items': 'center'}),
         html.Hr(),
-        # html.Div([networking_link, 
-        # networking_all_link],
-        #         style={'display': 'flex', 'align-items': 'center'}),
+        html.Div([networking_link, 
+        networking_all_link],
+                style={'display': 'flex', 'align-items': 'center'}),
         html.Hr(),
         download_link,
         html.H3("Selected USIs for Dataset"),
