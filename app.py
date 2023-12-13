@@ -239,13 +239,15 @@ DASHBOARD = [
                                                         placeholder='Select Server: ',  # Set the default value to 'US Server'
                                                         style={'width': '300px', 'color': 'black', 'cursor':'default',
                                                                             'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 'display':'none'},   
-                                                        searchable=False,),
+                                                        searchable=False,
+                                                        value="us",),
                 dcc.Dropdown(                           id='server-dropdown-net',
                                                         options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
                                                         placeholder='Select Server: ',  # Set the default value to 'US Server'
                                                         style={'width': '300px', 'color': 'black', 'cursor':'default',
                                                                             'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 'display':'none'},
-                                                        searchable=False,)]),
+                                                        searchable=False,
+                                                        value="us",)]),
             ]),
          
             html.Hr(),
@@ -443,45 +445,14 @@ def _determine_row_selection_list(file_table_data, selected_table_data, get_all=
         return output_list
     
 
-# @app.callback(
-#     Output('dash', 'href'),
-#     Output('dash-all', 'href'),
-#     Output('network', 'href'),
-#     Output('network-all', 'href'),
-#     [Input('server-dropdown', 'value')]
-# )
-# def update_links(selected_server):
-#     google_url = 'https://www.google.com'
-#     example1_url = 'https://www.google.com'
-#     example2_url = 'https://www.google.de'
-#     example3_url = 'https://www.google.de'
-
-#     if selected_server == 'us':
-#         return google_url, example1_url, example2_url, example3_url
-#     elif selected_server == 'de':
-#         # Replace with the URLs for the German server
-#         return google_url, example1_url, example2_url, example3_url 
-
-def get_link(name,url, selected_server):
+def get_link(name,us_url,de_url,params, selected_server):
     placeholder = None
-    if selected_server == "de":
-        placeholder =  dcc.Link(name,href= "https://google.com", target="_blank")
-
+    if selected_server == 'de':
+        placeholder =  dcc.Link(name,href=de_url + urllib.parse.quote(json.dumps(params)) , target="_blank")
     else:
-        placeholder = dcc.Link(name,href=url,target="_blank")   
+        placeholder = dcc.Link(name,href=us_url + urllib.parse.quote(json.dumps(params)) , target="_blank")
 
     return placeholder 
-
-def get_network(name, network_url, selected_server):
-    network = None
-    if selected_server == 'de':
-        network = dcc.Link(name,href= "https://google.de", target='_blank')
-    else:
-        network = dcc.Link(name,href=network_url, target='_blank')
-    return network
-
-
-
 
 
 @app.callback([   
@@ -520,16 +491,13 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     total_file_count = len(usi_list1) + len(usi_list2)
 
 
-    dashboard_url = "https://dashboard.gnps2.org/#" + urllib.parse.quote(json.dumps(url_params))
-
-    url_provenance_us = dbc.Button("Visualize {} Files in GNPS2 Dashboard".format(total_file_count), color="primary", className="me-1")
-    link_selected_object = get_link(url_provenance_us,dashboard_url, selected_server)
+    dashboard_us = "https://dashboard.gnps2.org/#" 
+    dashboard_de = "http://de.dashboard.gnps2.org/#"
 
 
-    # link_selected_object = dcc.Link(url_provenance_us, href="https://dashboard.gnps2.org/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
+    url_provenance = dbc.Button("Visualize {} Files in GNPS2 Dashboard".format(total_file_count), color="primary", className="me-1")
+    link_selected_object = get_link(url_provenance, dashboard_us,dashboard_de ,url_params, selected_server)
 
-    # url_provenance_de = dbc.Button("Visualize {} Files in GNPS2 Dashboard".format(total_file_count), color="primary", className="me-1")
-    # link_selected_object = dcc.Link(url_provenance_de, href="https://google.com/#" + urllib.parse.quote(json.dumps(url_params)) , target="_blank")
     # Selecting the max of all files
     all_usi_list1 = _determine_usi_list(accession, file_table_data, selected_table_data, get_all=True, private=is_private)
     all_usi_list1_complete = all_usi_list1
@@ -542,39 +510,8 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     url_params["usi"] = "\n".join(all_usi_list1)
     url_params["usi2"] = "\n".join(all_usi_list2)
 
-
     link_all = dbc.Button("Visualize All Filtered {} Files (24 max each) in GNPS2 Dashboard".format(len(all_usi_list1) + len(all_usi_list2)), color="primary", className="me-1")
-    link_all_object = get_link(link_all, dashboard_url, selected_server)
-    #test_all_object = dcc.Textarea(id='example', value=(url_params['usi']),)
-
-
-
-    # Button for networking
-    gnps_file_list1 = _determine_gnps_list(accession, file_table_data, selected_table_data)
-    # gnps_file_list2 = _determine_gnps_list(accession, file_table_data2, selected_table_data2)
-    # parameters = {}
-    # parameters["workflow"] = "METABOLOMICS-SNETS-V2"
-    # parameters["spec_on_server"] = ";".join(gnps_file_list1)
-    # parameters["spec_on_server_group2"] = ";".join(gnps_file_list2)
-
-    # gnps_url = "https://gnps.ucsd.edu/ProteoSAFe/index.jsp?params="
-    # gnps_url = gnps_url + urllib.parse.quote(json.dumps(parameters))
-
-    # networking_button = dbc.Button("Molecular Network {} Files at GNPS".format(len(gnps_file_list1) + len(gnps_file_list2)), color="primary", className="me-1")
-    # networking_link = get_link(networking_button, gnps_url, selected_server)
-  
-
-    # gnps_file_list1 = _determine_gnps_list(accession, file_table_data, selected_table_data, get_all=True)
-    # gnps_file_list2 = _determine_gnps_list(accession, file_table_data2, selected_table_data2, get_all=True)
-
-    # parameters["spec_on_server"] = ";".join(gnps_file_list1)
-    # parameters["spec_on_server_group2"] = ";".join(gnps_file_list2)
-
-    # gnps_url = "https://gnps.ucsd.edu/ProteoSAFe/index.jsp?params="
-    # gnps_url = gnps_url + urllib.parse.quote(json.dumps(parameters))
-
-    # networking_all_button = dbc.Button("Molecular Network All {} Files at GNPS".format(len(gnps_file_list1) + len(gnps_file_list2)), color="primary", className="me-1")
-    # networking_all_link = get_link(networking_all_button, gnps_url, selected_server)
+    link_all_object = get_link(link_all, dashboard_us,dashboard_de ,url_params, selected_server)
 
 
     # Creating the set of USIs in text area
@@ -595,34 +532,25 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
         readOnly=True
     )
 
-
-    
-
     # Here we will have the GNPS2 analysis urls
-    gnps2_url = "https://gnps2.org/workflowinput?workflowname=classical_networking_workflow"
-
+    gnps2_url = "https://gnps2.org/workflowinput?workflowname=classical_networking_workflow#"
+    gnps2_de = "https://de.gnps2.org/workflowinput?workflowname=classical_networking_workflow#"
     # For selected GNPS2 USIs
     gnps2_parameters = {}
     gnps2_parameters["usi"] = "\n".join(usi_list1)
     gnps2_parameters["description"] = "USI Molecular Networking Analysis"
 
-    gnps2_updated_url = gnps2_url + "#" + urllib.parse.quote(json.dumps(gnps2_parameters))
 
     gnps2_selected_networking_button = dbc.Button("Molecular Network Selected {} Files at GNPS2".format(len(usi_list1)), color="primary", className="me-1")
-    gnps2_selected_networking_link = get_network(gnps2_selected_networking_button, gnps2_updated_url, selected_net)    
+    gnps2_selected_networking_link = get_link(gnps2_selected_networking_button, gnps2_url,gnps2_de ,gnps2_parameters, selected_net)
 
     # All USIs
     gnps2_parameters = {}
     gnps2_parameters["usi"] = "\n".join(all_usi_list1)
     gnps2_parameters["description"] = "USI Molecular Networking Analysis"
 
-    # Writing parameters as a hash
-    gnps2_updated_url = gnps2_url + "#" + urllib.parse.quote(json.dumps(gnps2_parameters))
-
     gnps2_all_networking_button = dbc.Button("Molecular Network All {} Files at GNPS2".format(len(all_usi_list1)), color="primary", className="me-1")
-    gnps2_all_networking_link = get_network(gnps2_all_networking_button, gnps2_updated_url, selected_net)    
-
-
+    gnps2_all_networking_link = get_link(gnps2_all_networking_button, gnps2_url,gnps2_de ,gnps2_parameters, selected_net)
 
 
     # Downloading file link
@@ -652,7 +580,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
         html.Div([link_selected_object, link_all_object, dcc.Dropdown(
                                                     id='server-dropdown',
                                                     options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
-                                                    #placeholder='Select Server: ',  # Set the default value to 'US Server'
+                                                    placeholder='Select Server: ',  # Set the default value to 'US Server'
                                                     style={'width': '300px', 'color': 'black', 'cursor':'default',
                                                                         'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 
                                                                         },
@@ -666,7 +594,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
         gnps2_all_networking_link, dcc.Dropdown(
                                                     id='server-dropdown-net',
                                                     options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
-                                                    #placeholder='Select Server: ',  # Set the default value to 'US Server'
+                                                    placeholder='Select Server: ',  # Set the default value to 'US Server'
                                                     style={'width': '300px', 'color': 'black', 'cursor':'default',
                                                                         'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 
                                                                         },
@@ -676,10 +604,6 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
         
                                                 )],
                 style={'display': 'flex', 'align-items': 'center'}),
-        html.Hr(),
-        # html.Div([networking_link, 
-        # networking_all_link],
-        #         style={'display': 'flex', 'align-items': 'center'}),
         html.Hr(),
         download_link,
         html.H3("Selected USIs for Dataset"),
