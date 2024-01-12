@@ -73,23 +73,77 @@ def _get_mtbls_dataset_information(dataset_accession):
     return title, description
 
 def _get_mtbls_files(dataset_accession):
-    url = "https://www.ebi.ac.uk:443/metabolights/ws/studies/{}/files/tree?include_sub_dir=true".format(dataset_accession)
-    r = requests.get(url)
-
-    acceptable_types = ['raw', 'derived']
     
-    all_files = r.json()["study"]
-    all_files = [file_obj for file_obj in all_files if file_obj["directory"] is False]
-    all_files = [file_obj for file_obj in all_files if file_obj["type"] in acceptable_types]
+    study_url = "https://www.ebi.ac.uk:443/metabolights/ws/studies/public/study/" + dataset_accession
 
-    acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw"]
+    response = requests.get(study_url)
+    study_details = response.json()
 
-    acceptable_files = []
-    for file_object in all_files:
-        try:
-            if os.path.splitext(file_object["file"])[1].lower() in acceptable_extensions:
-                acceptable_files.append(file_object)
-        except:
-            pass
+    study_assays = study_details['content']['assays']
+
+    df_assays = pd.DataFrame()
+    ms_study_assays = []
+
+    #get study assays if they are MS. There can be multiple assay tables in the same study
+    for index, assay_json in enumerate(study_assays):
+        if assay_json['technology'] == 'mass spectrometry':  
+
+            # Extract headers in the correct order
+            headers = [None] * len(assay_json['assayTable']['fields'])
+            for key, value in assay_json['assayTable']['fields'].items():
+                headers[value['index']] = value['header']        
+
+            df = pd.DataFrame(assay_json['assayTable']['data'])
+            df.columns = headers
+
+            ms_study_assays.append(df)
+
+    if len(ms_study_assays) > 0:
+
+        all_columns = set()
+        for df in ms_study_assays:
+            all_columns.update(df.columns)
+
+        aligned_dfs = []
+        for df in ms_study_assays:
+            # Add missing columns with NaN values
+            for col in all_columns:
+                if col not in df.columns:
+                    df[col] = np.nan
+
+        # Reorder columns and add to the aligned list
+        aligned_dfs.append(df[list(all_columns)])
+
+        df_assays = pd.concat(aligned_dfs, ignore_index=True)
+
+        # Duplicate rows if we have mzml AND raw files
+        extensions = [".mzml", ".mzxml", ".cdf", ".raw", ".wiff", ".d"]
+        raw_files = df_assays[df_assays['Raw Spectral Data File'].str.lower().str.endswith(tuple(extensions), na=False)]['Raw Spectral Data File'].tolist() if 'Raw Spectral Data File' in df_assays.columns else []
+        mzml_files = df_assays[df_assays['Derived Spectral Data File'].str.lower().str.endswith(tuple(extensions), na=False)]['Derived Spectral Data File'].tolist() if 'Derived Spectral Data File' in df_assays.columns else []
+
+        all_files = raw_files + mzml_files
+
+        return all_files
+
+
+# def _get_mtbls_files(dataset_accession):
+#     url = "https://www.ebi.ac.uk:443/metabolights/ws/studies/{}/files/tree?include_sub_dir=true".format(dataset_accession)
+#     r = requests.get(url)
+
+#     acceptable_types = ['raw', 'derived']
     
-    return acceptable_files
+#     all_files = r.json()["study"]
+#     all_files = [file_obj for file_obj in all_files if file_obj["directory"] is False]
+#     all_files = [file_obj for file_obj in all_files if file_obj["type"] in acceptable_types]
+
+#     acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw"]
+
+#     acceptable_files = []
+#     for file_object in all_files:
+#         try:
+#             if os.path.splitext(file_object["file"])[1].lower() in acceptable_extensions:
+#                 acceptable_files.append(file_object)
+#         except:
+#             pass
+    
+#     return acceptable_files
