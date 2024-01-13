@@ -1,2 +1,2 @@
 test:
-	nose2 -v
+	pytest -vv *.py

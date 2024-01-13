@@ -34,9 +34,7 @@ def get_dataset_files(accession, metadata_source, dataset_password="", metadata_
 
     elif "MTBLS" in accession:
         all_files = metabolights._get_mtbls_files(accession)
-        temp_df = pd.DataFrame(all_files)
-        files_df = pd.DataFrame()
-        files_df["filename"] = temp_df["file"]
+        files_df = pd.DataFrame(all_files)
         files_df = metabolights.add_mtbls_metadata(files_df, accession)
 
     elif "PXD" in accession:

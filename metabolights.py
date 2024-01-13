@@ -121,7 +121,14 @@ def _get_mtbls_files(dataset_accession):
         raw_files = df_assays[df_assays['Raw Spectral Data File'].str.lower().str.endswith(tuple(extensions), na=False)]['Raw Spectral Data File'].tolist() if 'Raw Spectral Data File' in df_assays.columns else []
         mzml_files = df_assays[df_assays['Derived Spectral Data File'].str.lower().str.endswith(tuple(extensions), na=False)]['Derived Spectral Data File'].tolist() if 'Derived Spectral Data File' in df_assays.columns else []
 
-        all_files = raw_files + mzml_files
+        combined_files = raw_files + mzml_files
+
+        # formatting the output
+        all_files = []
+        for file in combined_files:
+            file_dict = {}
+            file_dict["filename"] = file
+            all_files.append(file_dict)
 
         return all_files
 

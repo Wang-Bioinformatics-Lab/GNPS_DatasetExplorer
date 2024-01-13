@@ -24,8 +24,9 @@ def test_mtbls():
         #utils.get_dataset_files(accession, "REDU")
         possible_assays, study_metadata_filename = metabolights.get_active_assays(accession)
         metadata_df = metabolights.get_study_level_metadata(accession, study_metadata_filename)
+        files_df = utils.get_dataset_files(accession, "")
 
-        print(metadata_df)
+        print("XXX", files_df)
 
 def test_pride():
     accessions = ["PXD005011", "PXD001726"]
@@ -56,7 +57,8 @@ def test_gnps_fbmn():
 def main():
     #test_msv_massive_metadata()
     #test_zenodo()
-    test_workbench()
+    #test_workbench()
+    test_mtbls()
 
 if __name__ == "__main__":
     main()
