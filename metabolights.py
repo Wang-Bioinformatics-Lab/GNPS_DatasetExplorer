@@ -28,14 +28,12 @@ def add_mtbls_metadata(files_df, accession):
 
         study_metadata_df = pd.concat(assay_list, ignore_index=True)     
 
-
         # Remove unnecissary columns and adapt column names
         def extract_bracketed_text(col_name):
             match = re.search(r'\[(.*?)\]', col_name)
             return match.group(1) if match else col_name
         
         study_metadata_df.columns = [extract_bracketed_text(col) for col in study_metadata_df.columns]
-        
         
         desired_columns = ['Instrument', 'Instrument manufacturer', 'Raw Spectral Data File', 'Derived Spectral Data File', 'Scan polarity']
         study_metadata_df = study_metadata_df[[col for col in desired_columns if col in study_metadata_df.columns]]
@@ -64,8 +62,13 @@ def add_mtbls_metadata(files_df, accession):
         elif len(df_study_raw) == 0 and len(df_study_mzml) == 0:
             return pd.DataFrame()
 
+        #this is because some Metabolights assays dont have the path but only the filename in the metadata table which prevents string matching
+        if study_metadata_df['Sample Name'].str.contains('/').all():
+            files_df["Sample Name"] = files_df["filename"]
+        else:
+            files_df["Sample Name"] = files_df["filename"].apply(lambda x: os.path.basename(x))
 
-        files_df["Sample Name"] = files_df["filename"]
+        #combine filenames and tables
         files_df = files_df.merge(study_metadata_df, how="left", on="Sample Name")
 
 
@@ -140,7 +143,6 @@ def _get_mtbls_files(dataset_accession):
     #get study assays if they are MS. There can be multiple assay tables in the same study
     for index, assay_json in enumerate(study_assays):
         if assay_json['technology'] == 'mass spectrometry':  
-
             # Extract headers in the correct order
             headers = [None] * len(assay_json['assayTable']['fields'])
             for key, value in assay_json['assayTable']['fields'].items():
@@ -148,7 +150,6 @@ def _get_mtbls_files(dataset_accession):
 
             df = pd.DataFrame(assay_json['assayTable']['data'])
             df.columns = headers
-
             ms_study_assays.append(df)
 
     if len(ms_study_assays) > 0:
@@ -164,11 +165,10 @@ def _get_mtbls_files(dataset_accession):
                 if col not in df.columns:
                     df[col] = np.nan
 
-        # Reorder columns and add to the aligned list
-        aligned_dfs.append(df[list(all_columns)])
+            # Reorder columns and add to the aligned list
+            aligned_dfs.append(df[list(all_columns)])
 
         df_assays = pd.concat(aligned_dfs, ignore_index=True)
-
         # Duplicate rows if we have mzml AND raw files
         extensions = [".mzml", ".mzxml", ".cdf", ".raw", ".wiff", ".d"]
         raw_files = df_assays[df_assays['Raw Spectral Data File'].str.lower().str.endswith(tuple(extensions), na=False)]['Raw Spectral Data File'].tolist() if 'Raw Spectral Data File' in df_assays.columns else []
@@ -185,6 +185,12 @@ def _get_mtbls_files(dataset_accession):
 
         return all_files
 
+
+
+#mtbls = 'MTBLS1842'
+#mtbls = 'MTBLS850'
+
+#
 
 # def _get_mtbls_files(dataset_accession):
 #     url = "https://www.ebi.ac.uk:443/metabolights/ws/studies/{}/files/tree?include_sub_dir=true".format(dataset_accession)
