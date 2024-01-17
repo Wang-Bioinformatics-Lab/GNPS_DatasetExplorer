@@ -70,21 +70,7 @@ NAVBAR = dbc.Navbar(
     dark=False,
     sticky="top",
 )
-# server_dropdown_1 = dcc.Dropdown(
-#     id='server-dropdown-1',
-#     options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
-#     style={'width': '300px', 'color': 'black', 'cursor':'default', 'font-weight': 'bold', 'z-index': 1000, 'opacity': 1},
-#     value='us',
-#     searchable=False,
-    
-# )
 
-# server_dropdown_2 = dcc.Dropdown(
-#     id='server-dropdown-2',
-#     options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
-#     style={'width': '300px', 'color': 'black', 'cursor':'default', 'font-weight': 'bold', 'z-index': 1000, 'opacity': 1},
-#     value='us',
-#     searchable=False,
     
 
 DASHBOARD = [
@@ -490,13 +476,15 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
 
     total_file_count = len(usi_list1) + len(usi_list2)
 
-
-    dashboard_us = "https://dashboard.gnps2.org/#" 
-    dashboard_de = "http://de.dashboard.gnps2.org/#"
-
-
+    # Dictionary to access the urls
+    servers = {"us_dash":"https://dashboard.gnps2.org/#",
+               "de_dash":"http://de.dashboard.gnps2.org/#",
+               "us_network":"https://gnps2.org/workflowinput?workflowname=classical_networking_workflow#",
+               "de_network": "https://de.gnps2.org/workflowinput?workflowname=classical_networking_workflow#"
+               }
+    
     url_provenance = dbc.Button("Visualize {} Files in GNPS2 Dashboard".format(total_file_count), color="primary", className="me-1")
-    link_selected_object = get_link(url_provenance, dashboard_us,dashboard_de ,url_params, selected_server)
+    link_selected_object = get_link(url_provenance, servers.get("us_dash"),servers.get("de_dash") ,url_params, selected_server)
 
     # Selecting the max of all files
     all_usi_list1 = _determine_usi_list(accession, file_table_data, selected_table_data, get_all=True, private=is_private)
@@ -511,7 +499,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     url_params["usi2"] = "\n".join(all_usi_list2)
 
     link_all = dbc.Button("Visualize All Filtered {} Files (24 max each) in GNPS2 Dashboard".format(len(all_usi_list1) + len(all_usi_list2)), color="primary", className="me-1")
-    link_all_object = get_link(link_all, dashboard_us,dashboard_de ,url_params, selected_server)
+    link_all_object = get_link(link_all, servers.get("us_dash"),servers.get("de_dash") ,url_params, selected_server)
 
 
     # Creating the set of USIs in text area
@@ -531,10 +519,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
         style={'width': '100%', 'height': 300},
         readOnly=True
     )
-
-    # Here we will have the GNPS2 analysis urls
-    gnps2_url = "https://gnps2.org/workflowinput?workflowname=classical_networking_workflow#"
-    gnps2_de = "https://de.gnps2.org/workflowinput?workflowname=classical_networking_workflow#"
+    
     # For selected GNPS2 USIs
     gnps2_parameters = {}
     gnps2_parameters["usi"] = "\n".join(usi_list1)
@@ -542,7 +527,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
 
 
     gnps2_selected_networking_button = dbc.Button("Molecular Network Selected {} Files at GNPS2".format(len(usi_list1)), color="primary", className="me-1")
-    gnps2_selected_networking_link = get_link(gnps2_selected_networking_button, gnps2_url,gnps2_de ,gnps2_parameters, selected_net)
+    gnps2_selected_networking_link = get_link(gnps2_selected_networking_button, servers.get("us_network"),servers.get("de_network") ,gnps2_parameters, selected_net)
 
     # All USIs
     gnps2_parameters = {}
@@ -550,7 +535,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     gnps2_parameters["description"] = "USI Molecular Networking Analysis"
 
     gnps2_all_networking_button = dbc.Button("Molecular Network All {} Files at GNPS2".format(len(all_usi_list1)), color="primary", className="me-1")
-    gnps2_all_networking_link = get_link(gnps2_all_networking_button, gnps2_url,gnps2_de ,gnps2_parameters, selected_net)
+    gnps2_all_networking_link = get_link(gnps2_all_networking_button, servers.get("us_network"),servers.get("de_network") ,gnps2_parameters, selected_net)
 
 
     # Downloading file link
@@ -599,7 +584,6 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
                                                                         'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 
                                                                         },
                                                     value=selected_net,
-                                                    
                                                     searchable=False,
         
                                                 )],

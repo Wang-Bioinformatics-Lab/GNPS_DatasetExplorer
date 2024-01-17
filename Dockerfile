@@ -1,12 +1,3 @@
-FROM continuumio/miniconda3:4.10.3 as cleanup
-
-# Set the container name
-
-# Stop and remove the container, delete the image
-RUN docker stop gnpsdatasetchooser-dash || true \
-	&& docker rm gnpsdatasetchooser-dash || true \
-   	&& docker rmi gnps_datasetexplorer-gnpsdatasetchooser-dash
-
 # Start building the new image
 FROM continuumio/miniconda3:4.10.3
 MAINTAINER Mingxun Wang "mwang87@gmail.com"
