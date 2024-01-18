@@ -452,12 +452,10 @@ def get_link(name,us_url,de_url,params, selected_server):
                   Input('file-table', 'derived_virtual_selected_rows'),
                   Input('file-table2', 'derived_virtual_data'),
                   Input('file-table2', 'derived_virtual_selected_rows'),
-                  Input('server-dropdown', 'value'),
-                  Input('server-dropdown-net', 'value'),
-                  
+                  Input('server-dropdown', 'value'),             
               ])
 
-def create_link(accession, dataset_password, file_table_data, selected_table_data, file_table_data2, selected_table_data2,selected_server,selected_net):
+def create_link(accession, dataset_password, file_table_data, selected_table_data, file_table_data2, selected_table_data2,selected_server):
     
     is_private = False
     if len(dataset_password) > 0:
@@ -479,8 +477,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     # Dictionary to access the urls
     servers = {"us_dash":"https://dashboard.gnps2.org/#",
                "de_dash":"http://de.dashboard.gnps2.org/#",
-               "us_network":"https://gnps2.org/workflowinput?workflowname=classical_networking_workflow#",
-               "de_network": "https://de.gnps2.org/workflowinput?workflowname=classical_networking_workflow#"
+               "us_network":"https://gnps2.org/workflowinput?workflowname=classical_networking_workflow#"
                }
     
     url_provenance = dbc.Button("Visualize {} Files in GNPS2 Dashboard".format(total_file_count), color="primary", className="me-1")
@@ -527,7 +524,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
 
 
     gnps2_selected_networking_button = dbc.Button("Molecular Network Selected {} Files at GNPS2".format(len(usi_list1)), color="primary", className="me-1")
-    gnps2_selected_networking_link = get_link(gnps2_selected_networking_button, servers.get("us_network"),servers.get("de_network") ,gnps2_parameters, selected_net)
+    gnps2_selected_networking_link = dcc.Link(gnps2_selected_networking_button, href=servers.get("us_network"), target="_blank")  
 
     # All USIs
     gnps2_parameters = {}
@@ -535,7 +532,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     gnps2_parameters["description"] = "USI Molecular Networking Analysis"
 
     gnps2_all_networking_button = dbc.Button("Molecular Network All {} Files at GNPS2".format(len(all_usi_list1)), color="primary", className="me-1")
-    gnps2_all_networking_link = get_link(gnps2_all_networking_button, servers.get("us_network"),servers.get("de_network") ,gnps2_parameters, selected_net)
+    gnps2_all_networking_link = dcc.Link(gnps2_all_networking_button, href=servers.get("us_network"), target="_blank")
 
 
     # Downloading file link
@@ -575,19 +572,8 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
                                                 )],
                 style={'display': 'flex', 'align-items': 'center'}),
         html.Hr(),
-        html.Div([gnps2_selected_networking_link,
-        gnps2_all_networking_link, dcc.Dropdown(
-                                                    id='server-dropdown-net',
-                                                    options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
-                                                    placeholder='Select Server: ',  # Set the default value to 'US Server'
-                                                    style={'width': '300px', 'color': 'black', 'cursor':'default',
-                                                                        'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 
-                                                                        },
-                                                    value=selected_net,
-                                                    searchable=False,
-        
-                                                )],
-                style={'display': 'flex', 'align-items': 'center'}),
+        gnps2_selected_networking_link,
+        gnps2_all_networking_link,
         html.Hr(),
         download_link,
         html.H3("Selected USIs for Dataset"),
