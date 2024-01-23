@@ -227,13 +227,7 @@ DASHBOARD = [
                                                                             'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 'display':'none'},   
                                                         searchable=False,
                                                         value="us",),
-                dcc.Dropdown(                           id='server-dropdown-net',
-                                                        options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
-                                                        placeholder='Select Server: ',  # Set the default value to 'US Server'
-                                                        style={'width': '300px', 'color': 'black', 'cursor':'default',
-                                                                            'font-weight': 'bold', 'z-index': 1000, 'opacity': 1, 'display':'none'},
-                                                        searchable=False,
-                                                        value="us",)]),
+                ]),
             ]),
          
             html.Hr(),
