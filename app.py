@@ -676,7 +676,7 @@ def dataset_information(accession, dataset_password):
         else:
             return ["Unknown Dataset - {}".format(accession), "Unknown Dataset No Description"]
 
-    dataset_title_div = html.H3(children=[dbc.Badge(accession, color="info", className="ml-1"), dataset_title])
+    dataset_title_div = html.H3(children=[dbc.Badge(accession, color="info", className="ml-1"), html.Br(), dataset_title])
 
     return [dataset_title_div, dataset_description]
 
