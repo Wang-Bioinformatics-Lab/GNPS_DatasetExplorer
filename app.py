@@ -55,7 +55,7 @@ NAVBAR = dbc.Navbar(
         ),
         dbc.Nav(
             [
-                dbc.NavItem(dbc.NavLink("GNPS Dataset Dashboard", href="#")),
+                dbc.NavItem(dbc.NavLink("GNPS2 Dataset Explorer Dashboard", href="#")),
                 dbc.NavItem(dbc.NavLink("Documentation", href="https://ccms-ucsd.github.io/GNPSDocumentation/gnpsdatasetexplorer/")),
             ],
         navbar=True)
