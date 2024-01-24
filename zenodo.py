@@ -15,12 +15,9 @@ def _get_zenodo_files(dataset_accession):
 
     all_files = r.json()['files']
 
-    import sys
-    print(all_files, file=sys.stderr, flush=True)
-
     for file in all_files:
         if file['key'].lower().endswith(acceptable_extensions):
-            all_filenames.append(file['filename'])
+            all_filenames.append(file['key'])
 
         if file['key'].endswith('.zip'):
             url = file['links']['self']
