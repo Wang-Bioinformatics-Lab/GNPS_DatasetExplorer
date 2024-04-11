@@ -202,7 +202,7 @@ def _get_massive_files_ftp(dataset_accession, dataset_password=""):
     return all_files_df
 
 def _get_massive_files_cached(dataset_accession):
-    url = "https://gnps-datasetcache.ucsd.edu/datasette/database/filename.csv?_stream=on&_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
+    url = "https://datasetcache.gnps2.org/datasette/database/filename.csv?_stream=on&_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
     #url = "http://mingwangbeta.ucsd.edu:5235/datasette/database/filename.csv?_stream=on&_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
     all_files_df = pd.read_csv(url, sep=",")
 
