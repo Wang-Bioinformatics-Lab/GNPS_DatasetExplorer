@@ -14,13 +14,14 @@ def _get_zenodo_files(dataset_accession):
     acceptable_extensions = (".raw", '.mzml', '.mzxml')
 
     all_files = r.json()['files']
-    for file in all_files:
-        if file['filename'].lower().endswith(acceptable_extensions):
-            all_filenames.append(file['filename'])
 
-        if file['filename'].endswith('.zip'):
-            url = file['links']['download']
-            zip_filename = file['filename']
+    for file in all_files:
+        if file['key'].lower().endswith(acceptable_extensions):
+            all_filenames.append(file['key'])
+
+        if file['key'].endswith('.zip'):
+            url = file['links']['self']
+            zip_filename = file['key']
 
             # Finding all the filenames
             with RemoteZip(url) as zip:

@@ -23,4 +23,6 @@ services:
 networks:
   nginx-net:
     external:
-      name: nginx-net
+        name: nginx-net
+    
+    

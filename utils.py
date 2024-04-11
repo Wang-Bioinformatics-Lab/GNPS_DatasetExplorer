@@ -34,9 +34,7 @@ def get_dataset_files(accession, metadata_source, dataset_password="", metadata_
 
     elif "MTBLS" in accession:
         all_files = metabolights._get_mtbls_files(accession)
-        temp_df = pd.DataFrame(all_files)
-        files_df = pd.DataFrame()
-        files_df["filename"] = temp_df["file"]
+        files_df = pd.DataFrame(all_files)
         files_df = metabolights.add_mtbls_metadata(files_df, accession)
 
     elif "PXD" in accession:
@@ -202,8 +200,8 @@ def _get_massive_files_ftp(dataset_accession, dataset_password=""):
     return all_files_df
 
 def _get_massive_files_cached(dataset_accession):
+
     url = "https://datasetcache.gnps2.org/datasette/database/filename.csv?_stream=on&_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
-    #url = "http://mingwangbeta.ucsd.edu:5235/datasette/database/filename.csv?_stream=on&_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
     all_files_df = pd.read_csv(url, sep=",")
 
     all_files = list(all_files_df["filepath"])
