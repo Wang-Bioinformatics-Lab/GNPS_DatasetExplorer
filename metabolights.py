@@ -148,7 +148,23 @@ def _get_mtbls_files(dataset_accession):
         all_files_df = _get_mtbls_files_cached(dataset_accession)
 
         if len(all_files_df) > 0:
-            return all_files_df
+            files_df = pd.DataFrame()
+            files_df["filename"] = all_files_df["filepath"]
+
+            # Adding more information if possible
+            if "collection" in all_files_df:
+                files_df["collection"] = all_files_df["collection"]
+                
+            if "update_name" in all_files_df:
+                files_df["update_name"] = all_files_df["update_name"]
+
+            if "size_mb" in all_files_df:
+                files_df["size_mb"] = all_files_df["size_mb"]
+                files_df["ms2"] = all_files_df["spectra_ms2"]
+                files_df["Vendor"] = all_files_df["instrument_vendor"]
+                files_df["Model"] = all_files_df["instrument_model"]
+
+            return files_df
     except:
         pass
     
