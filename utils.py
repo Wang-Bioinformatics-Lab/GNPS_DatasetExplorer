@@ -31,10 +31,8 @@ def get_dataset_files(accession, metadata_source, dataset_password="", metadata_
             files_df = _add_redu_metadata(files_df, accession)
         elif metadata_source == "MASSIVE":
             files_df = _add_massive_metadata(files_df, accession, metadata_option=metadata_option)
-
     elif "MTBLS" in accession:
-        all_files = metabolights._get_mtbls_files(accession)
-        files_df = pd.DataFrame(all_files)
+        files_df = metabolights._get_mtbls_files(accession)
         files_df = metabolights.add_mtbls_metadata(files_df, accession)
 
     elif "PXD" in accession:
@@ -201,14 +199,15 @@ def _get_massive_files_ftp(dataset_accession, dataset_password=""):
 
 def _get_massive_files_cached(dataset_accession):
 
-    url = "https://datasetcache.gnps2.org/datasette/database/filename.csv?_stream=on&_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
+    url = "https://datasetcache.gnps2.org/datasette/database/filename.csv?_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
+
     all_files_df = pd.read_csv(url, sep=",")
 
     all_files = list(all_files_df["filepath"])
 
     acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw"]
     
-    all_files = [filename for filename in all_files if os.path.splitext(filename)[1].lower() in acceptable_extensions]
+    all_files = [filename for filename in all_files if os.path.splitext(filename)[-1].lower() in acceptable_extensions]
 
     all_files_df = all_files_df[all_files_df["filepath"].isin(all_files)]
 

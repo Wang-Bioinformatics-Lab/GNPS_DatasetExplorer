@@ -691,9 +691,9 @@ def set_page_size(page_size):
 # Creating an API
 @app.server.route('/api/datasets/<accession>/files')
 def get_dataset_files(accession):
-    dataset_files = _get_dataset_files(accession, "REDU")
+    dataset_files_df = _get_dataset_files(accession, "None")
     
-    return dataset_files.to_json(orient="records")
+    return dataset_files_df.to_json(orient="records")
 
 if __name__ == "__main__":
     app.run_server(debug=True, port=5000, host="0.0.0.0")

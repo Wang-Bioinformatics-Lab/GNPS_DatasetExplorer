@@ -9,8 +9,11 @@ def test_msv():
     #accession = "MSV000086206"
     #dataset_files_df = utils.get_dataset_files(accession, "REDU")
     
-    accession = "MSV000086873"
-    dataset_files_df = utils.get_dataset_files(accession, "REDU")
+    #accession = "MSV000086873"
+    #dataset_files_df = utils.get_dataset_files(accession, "REDU")
+
+    accession = "MSV000094648"
+    dataset_files_df = utils.get_dataset_files(accession, "None")
 
 def test_msv_massive_metadata():
     accession = "MSV000089459"
@@ -55,10 +58,11 @@ def test_gnps_fbmn():
     print(files_list)
 
 def main():
+    test_msv()
     #test_msv_massive_metadata()
     #test_zenodo()
     #test_workbench()
-    test_mtbls()
+    #test_mtbls()
 
 if __name__ == "__main__":
     main()

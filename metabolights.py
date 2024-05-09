@@ -128,7 +128,29 @@ def _get_mtbls_dataset_information(dataset_accession):
      
     return title, description
 
+def _get_mtbls_files_cached(dataset_accession):
+    url = "https://datasetcache.gnps2.org/datasette/database/filename.csv?_stream=on&_sort=filepath&dataset__exact={}&_size=max".format(dataset_accession)
+    all_files_df = pd.read_csv(url, sep=",")
+
+    all_files = list(all_files_df["filepath"])
+
+    acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw", ".d"]
+    
+    all_files = [filename for filename in all_files if os.path.splitext(filename)[1].lower() in acceptable_extensions]
+
+    all_files_df = all_files_df[all_files_df["filepath"].isin(all_files)]
+
+    return all_files_df
+
 def _get_mtbls_files(dataset_accession):
+    # Trying the cache to be a lot faster
+    try:
+        all_files_df = _get_mtbls_files_cached(dataset_accession)
+
+        if len(all_files_df) > 0:
+            return all_files_df
+    except:
+        pass
     
     study_url = "https://www.ebi.ac.uk:443/metabolights/ws/studies/public/study/" + dataset_accession
 
@@ -183,7 +205,7 @@ def _get_mtbls_files(dataset_accession):
             file_dict["filename"] = file
             all_files.append(file_dict)
 
-        return all_files
+        return pd.DataFrame(all_files)
 
 
 
