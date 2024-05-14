@@ -218,6 +218,12 @@ DASHBOARD = [
                     children=[html.Div(id="loading-output-9"),
                     ],
                 ),
+
+                # Making a download
+                # dbc.Button("Download All Selected", color="primary", className="me-1", id="download_all_button"),
+
+                # Making a store
+                dcc.Store(id='download_links_store'),
                 
                 html.Div([dcc.Dropdown(
                                                         id='server-dropdown',
@@ -437,6 +443,7 @@ def get_link(name,us_url,de_url,params, selected_server):
 
 @app.callback([   
                   Output('link-button', 'children'),
+                  Output('download_links_store', 'data'),
               ],
               [   
                   Input('dataset_accession', 'value'), 
@@ -529,8 +536,9 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
 
 
     # Lets create download links to the original source location
+    download_links_list = []
     if len(usi_list1) > 0:
-        download_list = []
+        download_button_list = []
 
         for usi in usi_list1:
             # getting the url from the dashboard
@@ -543,31 +551,20 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
                     download_button = dbc.Button("Download {}".format(usi), color="primary", className="me-1")
                     download_link = dcc.Link(download_button, href=download_url, target="_blank")
 
-                    download_list.append(download_link)
-                    download_list.append(html.Br())
-                    download_list.append(html.Br())
+                    download_links_list.append(download_url)
+
+                    download_button_list.append(download_link)
+                    download_button_list.append(html.Br())
+                    download_button_list.append(html.Br())
             except:
                 pass
 
-        download_links = html.Div(download_list)
-
-
-        # if "MSV" in accession:
-        #     selected_data_list = _determine_row_selection_list(file_table_data, selected_table_data)
-
-        #     download_url = "https://gnps-external.ucsd.edu/massiveftpproxy?ftppath=" + os.path.join(accession, selected_data_list[0]["filename"])
-        #     download_button = dbc.Button("Download First Selected File", color="primary", className="me-1")
-        #     download_link = dcc.Link(download_button, href=download_url, target="_blank")
-        # else:
-        #     download_link = html.Br()
+        download_links = html.Div(download_button_list)
     else:
         download_links = html.Br()
 
     # Selection Text
     selection_text = "Selected {} Default Files and {} Comparison Files for LCMS Analysis".format(len(usi_list1), len(usi_list2))
-
-    
-
 
     return [
     [
@@ -601,7 +598,8 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
         html.Hr(),
         html.H3("Selected USIs for Download"),
         download_links
-    ]
+    ],
+    download_links_list
 ]
 
 
@@ -712,6 +710,42 @@ def dataset_information(accession, dataset_password):
 )
 def set_page_size(page_size):
     return [int(page_size), int(page_size)]
+
+
+app.clientside_callback(
+    """
+    function(n_clicks, data) {
+        original_text = "Click to Download All Selected"
+        if (n_clicks > 0) {
+            console.log(data)
+            // looping through all links and forcing a download on the user
+            for (var i = 0; i < data.length; i++) {
+                var link = document.createElement('a');
+                link.href = data[i];
+                link.download = data[i].split("/").pop();
+
+                console.log("Downloading", link.download)
+
+                document.body.appendChild(link);
+                link.click();
+                //document.body.removeChild(link);
+            }
+
+            return 'Downloading All!';
+        } else {
+            return original_text;
+        }
+    }
+
+    """,
+    Output('download_all_button', 'children'),
+    [
+        Input('download_all_button', 'n_clicks'),
+    ],
+    [
+        State('download_links_store', 'data'),
+    ]
+)
 
 # Creating an API
 @app.server.route('/api/datasets/<accession>/files')
