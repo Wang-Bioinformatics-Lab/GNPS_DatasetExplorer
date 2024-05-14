@@ -437,7 +437,6 @@ def get_link(name,us_url,de_url,params, selected_server):
 
 @app.callback([   
                   Output('link-button', 'children'),
-                  
               ],
               [   
                   Input('dataset_accession', 'value'), 
@@ -529,21 +528,45 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     gnps2_all_networking_link = dcc.Link(gnps2_all_networking_button, href=servers.get("us_network"), target="_blank")
 
 
-    # Downloading file link
+    # Lets create download links to the original source location
     if len(usi_list1) > 0:
-        if "MSV" in accession:
-            selected_data_list = _determine_row_selection_list(file_table_data, selected_table_data)
+        download_list = []
 
-            download_url = "https://gnps-external.ucsd.edu/massiveftpproxy?ftppath=" + os.path.join(accession, selected_data_list[0]["filename"])
-            download_button = dbc.Button("Download First Selected File", color="primary", className="me-1")
-            download_link = dcc.Link(download_button, href=download_url, target="_blank")
-        else:
-            download_link = html.Br()
+        for usi in usi_list1:
+            # getting the url from the dashboard
+            resolve_url = "https://dashboard.gnps2.org/downloadlink?usi={}".format(usi)
+            try:
+                r = requests.get(resolve_url)
+
+                if r.status_code == 200:
+                    download_url = r.text
+                    download_button = dbc.Button("Download {}".format(usi), color="primary", className="me-1")
+                    download_link = dcc.Link(download_button, href=download_url, target="_blank")
+
+                    download_list.append(download_link)
+                    download_list.append(html.Br())
+                    download_list.append(html.Br())
+            except:
+                pass
+
+        download_links = html.Div(download_list)
+
+
+        # if "MSV" in accession:
+        #     selected_data_list = _determine_row_selection_list(file_table_data, selected_table_data)
+
+        #     download_url = "https://gnps-external.ucsd.edu/massiveftpproxy?ftppath=" + os.path.join(accession, selected_data_list[0]["filename"])
+        #     download_button = dbc.Button("Download First Selected File", color="primary", className="me-1")
+        #     download_link = dcc.Link(download_button, href=download_url, target="_blank")
+        # else:
+        #     download_link = html.Br()
     else:
-        download_link = html.Br()
+        download_links = html.Br()
 
     # Selection Text
     selection_text = "Selected {} Default Files and {} Comparison Files for LCMS Analysis".format(len(usi_list1), len(usi_list2))
+
+    
 
 
     return [
@@ -569,13 +592,15 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
         gnps2_selected_networking_link,
         gnps2_all_networking_link,
         html.Hr(),
-        download_link,
         html.H3("Selected USIs for Dataset"),
         html.Hr(),
         usi_textarea,
         html.Hr(),
         html.H3("All USIs for Dataset"),
-        usi_textarea_all
+        usi_textarea_all,
+        html.Hr(),
+        html.H3("Selected USIs for Download"),
+        download_links
     ]
 ]
 
