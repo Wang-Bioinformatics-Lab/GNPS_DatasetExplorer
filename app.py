@@ -431,7 +431,7 @@ def _determine_row_selection_list(file_table_data, selected_table_data, get_all=
         return output_list
     
 
-def get_link(name,us_url,de_url,params, selected_server):
+def get_formatted_analysis_link(name, us_url, de_url, params, selected_server):
     placeholder = None
     if selected_server == 'de':
         placeholder =  dcc.Link(name,href=de_url + urllib.parse.quote(json.dumps(params)) , target="_blank")
@@ -481,22 +481,22 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
                }
     
     url_provenance = dbc.Button("Visualize {} Files in GNPS2 Dashboard".format(total_file_count), color="primary", className="me-1")
-    link_selected_object = get_link(url_provenance, servers.get("us_dash"),servers.get("de_dash") ,url_params, selected_server)
+    link_selected_object = get_formatted_analysis_link(url_provenance, servers.get("us_dash"),servers.get("de_dash") ,url_params, selected_server)
 
     # Selecting the max of all files
     all_usi_list1 = _determine_usi_list(accession, file_table_data, selected_table_data, get_all=True, private=is_private)
     all_usi_list1_complete = all_usi_list1
-    all_usi_list1 = all_usi_list1[:50] # Lets limit to 24 here
+    all_usi_list1 = all_usi_list1[:24] # Lets limit to 24 here
 
     all_usi_list2 = _determine_usi_list(accession, file_table_data2, selected_table_data2, get_all=True, private=is_private)
-    all_usi_list2 = all_usi_list2[:50] # Lets limit to 24 here
+    all_usi_list2 = all_usi_list2[:24] # Lets limit to 24 here
     
     url_params = {}
     url_params["usi"] = "\n".join(all_usi_list1)
     url_params["usi2"] = "\n".join(all_usi_list2)
 
-    link_all = dbc.Button("Visualize All Filtered {} Files (24 max each) in GNPS2 Dashboard".format(len(all_usi_list1) + len(all_usi_list2)), color="primary", className="me-1")
-    link_all_object = get_link(link_all, servers.get("us_dash"),servers.get("de_dash") ,url_params, selected_server)
+    link_all_to_dashboard = dbc.Button("Visualize All Filtered {} Files (24 max each) in GNPS2 Dashboard".format(len(all_usi_list1) + len(all_usi_list2)), color="primary", className="me-1")
+    link_all_to_dashboard_object = get_formatted_analysis_link(link_all_to_dashboard, servers.get("us_dash"),servers.get("de_dash"), url_params, selected_server)
 
 
     # Creating the set of USIs in text area
@@ -524,7 +524,8 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
 
 
     gnps2_selected_networking_button = dbc.Button("Molecular Network Selected {} Files at GNPS2".format(len(usi_list1)), color="primary", className="me-1")
-    gnps2_selected_networking_link = dcc.Link(gnps2_selected_networking_button, href=servers.get("us_network"), target="_blank")  
+    gnps2_selected_networking_link = get_formatted_analysis_link(gnps2_selected_networking_button, servers.get("us_network"),servers.get("us_network"), gnps2_parameters, selected_server)
+    #gnps2_selected_networking_link = dcc.Link(gnps2_selected_networking_button, href=servers.get("us_network"), target="_blank")  
 
     # All USIs
     gnps2_parameters = {}
@@ -532,7 +533,8 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     gnps2_parameters["description"] = "USI Molecular Networking Analysis"
 
     gnps2_all_networking_button = dbc.Button("Molecular Network All {} Files at GNPS2".format(len(all_usi_list1)), color="primary", className="me-1")
-    gnps2_all_networking_link = dcc.Link(gnps2_all_networking_button, href=servers.get("us_network"), target="_blank")
+    gnps2_all_networking_link = get_formatted_analysis_link(gnps2_all_networking_button, servers.get("us_network"),servers.get("us_network"), gnps2_parameters, selected_server)
+    #gnps2_all_networking_link = dcc.Link(gnps2_all_networking_button, href=servers.get("us_network"), target="_blank")
 
 
     # Lets create download links to the original source location
@@ -573,7 +575,7 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
         selection_text, 
         html.Br(), 
         html.Br(),
-        html.Div([link_selected_object, link_all_object, dcc.Dropdown(
+        html.Div([link_selected_object, link_all_to_dashboard_object, dcc.Dropdown(
                                                     id='server-dropdown',
                                                     options=[{'label': 'USA-UCR', 'value': 'us'}, {'label': 'De-Tue', 'value': 'de'}],
                                                     placeholder='Select Server: ',  # Set the default value to 'US Server'
