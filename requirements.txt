@@ -16,3 +16,5 @@ ftputil
 xmltodict
 remotezip
 requests_cache
+beautifulsoup4
+git+https://github.com/Wang-Bioinformatics-Lab/GNPSDataPackage.git
