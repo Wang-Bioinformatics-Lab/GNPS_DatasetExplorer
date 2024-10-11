@@ -247,6 +247,8 @@ DASHBOARD = [
             html.Br(),
             html.A("MassIVE Dataset with CDF Files", href="/MSV000086521"),
             html.Br(),
+            html.A("MassIVE Dataset by DOI", href="/doi:10.25345/C5HV0S"),
+            html.Br(),
             html.A("Metabolights Dataset", href="/MTBLS1842"),
             html.Br(),
             html.A("Metabolights Dataset Imported into GNPS", href="/MSV000080931"),
@@ -311,6 +313,14 @@ def _get_param_from_url(search, param_key, default):
         pass
 
     return default
+
+# Here in case we have a DOI
+def _resolve_accession(accession):
+    if "doi" in accession:
+        doi = accession.replace("doi:", "")
+        accession = utils.get_accession_from_doi(doi)
+    return accession
+
 
 # This enables parsing the URL to shove a task into the qemistree id
 @app.callback([
@@ -460,6 +470,8 @@ def create_link(accession, dataset_password, file_table_data, selected_table_dat
     is_private = False
     if len(dataset_password) > 0:
         is_private = True
+
+    accession = _resolve_accession(accession)
 
     usi_list1 = _determine_usi_list(accession, file_table_data, selected_table_data, private=is_private)
     usi_list2 = _determine_usi_list(accession, file_table_data2, selected_table_data2, private=is_private)
@@ -634,6 +646,8 @@ def _get_dataset_description(accession):
 def list_files(accession, dataset_password, metadata_source, metadata_option):
     columns = [{"name": "filename", "id": "filename"}]
 
+    accession = _resolve_accession(accession)
+
     # If this errors out, then we want to clear the table
     try:
         files_df = _get_dataset_files(accession, metadata_source, dataset_password=dataset_password, metadata_option=metadata_option)
@@ -664,6 +678,9 @@ def list_files(accession, dataset_password, metadata_source, metadata_option):
     ]
 )
 def list_metadata_options(accession, dataset_password, metadata_source, url_search):
+    # clean the DOI
+    accession = _resolve_accession(accession)
+
     msv_accession = utils._accession_to_msv_accession(accession)
     
     metadata_list = utils._get_massive_metadata_options(msv_accession)
@@ -693,6 +710,9 @@ def list_metadata_options(accession, dataset_password, metadata_source, url_sear
     [Input('dataset_accession', 'value'), Input('dataset_password', 'value')],
 )
 def dataset_information(accession, dataset_password):
+    
+    accession = _resolve_accession(accession)
+
     try:
         dataset_title, dataset_description = _get_dataset_description(accession)
     except:

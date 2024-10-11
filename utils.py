@@ -303,3 +303,20 @@ def _add_task_metadata(files_df, task):
         pass
 
     return files_df
+
+def get_accession_from_doi(doi):
+    url = "https://doi.org/{}".format(doi)
+    r = requests.get(url)
+    
+    # we are going to parse result with bs4
+    from bs4 import BeautifulSoup
+
+    soup = BeautifulSoup(r.text, 'html.parser')
+
+    # parse out from h1 and get the content
+    accession = soup.find("h1")
+    accession = accession.text.replace("MassIVE ", "")
+    
+    return accession
+
+    
