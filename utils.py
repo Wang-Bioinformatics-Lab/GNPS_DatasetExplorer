@@ -286,9 +286,10 @@ def _add_massive_metadata(files_df, accession, metadata_option=None):
         else:
             metadata_filename = metadata_list[0]["File_descriptor"]
 
-        ftp_url = "ftp://massive.ucsd.edu/{}".format(metadata_filename.replace("f.", ""))
+        #ftp_url = "ftp://massive.ucsd.edu/{}".format(metadata_filename.replace("f.", ""))
+        http_url = "https://proteomics2.ucsd.edu/ProteoSAFe/DownloadResultFile?file={}&block=main".format(metadata_filename)
 
-        metadata_df = pd.read_csv(ftp_url, sep=None)
+        metadata_df = pd.read_csv(http_url, sep=None)
         # Clean the filename path
         metadata_df["filename"] = metadata_df["filename"].apply(lambda x: os.path.basename(x))
 

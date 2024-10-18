@@ -102,7 +102,7 @@ DASHBOARD = [
                             dcc.Dropdown(
                                 id='metadata_source',
                                 options=[
-                                    {'label': 'DEFAULT', 'value': 'DEFAULT'},
+                                    {'label': 'NONE', 'value': 'DEFAULT'},
                                     {'label': 'REDU', 'value': 'REDU'},
                                     {'label': 'MASSIVE', 'value': 'MASSIVE'},
                                 ],
@@ -149,7 +149,7 @@ DASHBOARD = [
                 dbc.Col(
                     dbc.Row(
                         [
-                            dbc.Label("Metadata Options", width=4.8, style={"width":"180px"}),
+                            dbc.Label("MassIVE Metadata Options", width=4.8, style={"width":"180px"}),
                             dcc.Dropdown(
                                 id='metadata_option',
                                 options=[],
@@ -241,7 +241,7 @@ DASHBOARD = [
             html.H3(children="Example Datasets"),
             html.Hr(),
 
-            html.A("GNPS/MassIVE Dataset with mzML Files", href="/MSV000086206"),
+            html.A("GNPS/MassIVE Dataset with mzML Files and Dataset Metadata", href="/?dataset_accession=MSV000086206&metadata_source=MASSIVE&metadata_option=f.MSV000086206%2Fmetadata%2Fmetadata.txt"),
             html.Br(),
             html.A("GNPS/MassIVE Dataset - Nissle Data for Workshop", href="/?dataset_accession=MSV000085443&metadata_source=MASSIVE&metadata_option=f.MSV000085443%2Fupdates%2F2020-05-18_daniel_c0133922%2Fmetadata%2Fmetadata_workshop.txt"),
             html.Br(),
@@ -362,7 +362,7 @@ def determine_task(pathname, url_search):
         #return "MTBLS1842"
     
     dataset_accession = _get_param_from_url(url_search, "dataset_accession", dataset_accession)
-    metadata_source = _get_param_from_url(url_search, "metadata_source", "DEFAULT")
+    metadata_source = _get_param_from_url(url_search, "metadata_source", "MASSIVE")
 
     return [dataset_accession, metadata_source]
 
