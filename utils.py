@@ -236,11 +236,30 @@ def _accession_to_msv_accession(accession):
 
 
 def _add_redu_metadata(files_df, accession):
-    redu_metadata = pd.read_csv("https://redu.ucsd.edu/dump", sep='\t')
-    files_df["filename"] = "f." + accession + "/" + files_df["filename"]
-    files_df = files_df.merge(redu_metadata, how="left", on="filename")
+
+    try:
+        # Lets try doing this the fast way with using the server side filtering to a dataset
+        url = "https://redu.gnps2.org/attribute/ATTRIBUTE_DatasetAccession/attributeterm/{}/files".format(accession)
+        redu_metadata_df = pd.read_json(url)
+
+    except:
+        redu_metadata_df = pd.read_csv("https://redu.gnps2.org/dump", sep='\t')
+
+        # filtering by dataset
+        redu_metadata_df = redu_metadata_df[redu_metadata_df["ATTRIBUTE_DatasetAccession"] == accession]
+
+    # Making sure the filenames match
+    files_df["filename"] = "f." + files_df["filename"]
+    
+    files_df = files_df.merge(redu_metadata_df, how="left", on="filename")
     files_df = files_df[["filename", "MassSpectrometer", "SampleType", "SampleTypeSub1"]]
-    files_df["filename"] = files_df["filename"].apply(lambda x: x.replace("f.{}/".format(accession), ""))
+
+    # remove the first 2 characters from the filename
+    files_df["filename"] = files_df["filename"].apply(lambda x: x[2:])
+    
+    # Add a column for ReDU Metadata if it was found, Yes or No depending if it was part of the merge step above
+    files_df["ReDU Metadata"] = "No"
+    files_df.loc[files_df["MassSpectrometer"].notnull(), "ReDU Metadata"] = "Yes"
 
     return files_df
 
