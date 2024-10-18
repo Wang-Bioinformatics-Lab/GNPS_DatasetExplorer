@@ -299,6 +299,24 @@ BODY = dbc.Container(
     className="mt-12",
 )
 
+app.index_string = """<!DOCTYPE html>
+<html>
+    <head>
+        <script async defer data-website-id="74bc9983-13c4-4da0-89ae-b78209c13aaf" src="https://analytics.gnps2.org/umami.js"></script>
+        {%metas%}
+        <title>{%title%}</title>
+        {%favicon%}
+        {%css%}
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>"""
 
 
 app.layout = html.Div(children=[NAVBAR, BODY])
