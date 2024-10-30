@@ -672,6 +672,7 @@ def list_files(accession, dataset_password, metadata_source, metadata_option):
     try:
         files_df = _get_dataset_files(accession, metadata_source, dataset_password=dataset_password, metadata_option=metadata_option)
     except:
+        raise
         return [html.Div("Error: Could not find files for this dataset"), [], columns, [], columns]
 
     new_columns = files_df.columns

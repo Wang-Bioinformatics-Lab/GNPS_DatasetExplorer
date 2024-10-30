@@ -242,11 +242,19 @@ def _add_redu_metadata(files_df, accession):
         url = "https://redu.gnps2.org/attribute/ATTRIBUTE_DatasetAccession/attributeterm/{}/files".format(accession)
         redu_metadata_df = pd.read_json(url)
 
+        # checking if empty, if yes, then we'll add a column called filename
+        if len(redu_metadata_df) == 0:
+            redu_metadata_df = pd.DataFrame()
+            redu_metadata_df["filename"] = []
+            redu_metadata_df["MassSpectrometer"] = []
+            redu_metadata_df["SampleType"] = []
+            redu_metadata_df["SampleTypeSub1"] = []
     except:
         redu_metadata_df = pd.read_csv("https://redu.gnps2.org/dump", sep='\t')
 
         # filtering by dataset
         redu_metadata_df = redu_metadata_df[redu_metadata_df["ATTRIBUTE_DatasetAccession"] == accession]
+
 
     # Making sure the filenames match
     files_df["filename"] = "f." + files_df["filename"]
