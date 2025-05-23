@@ -141,7 +141,7 @@ def _get_massive_files(dataset_accession, dataset_password=""):
             from gnpsdata import publicdata
             all_files = publicdata.get_massive_public_dataset_filelist(dataset_accession)
 
-            acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw"]
+            acceptable_extensions = [".mzml", ".mzxml", ".cdf", ".raw", ".mgf"]
 
             all_files = [fileobj for fileobj in all_files if os.path.splitext(fileobj["file_descriptor"])[1].lower() in acceptable_extensions]
 

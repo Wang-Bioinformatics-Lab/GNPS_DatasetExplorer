@@ -74,7 +74,7 @@ NAVBAR = dbc.Navbar(
     
 
 DASHBOARD = [
-    dbc.CardHeader(html.H5("GNPS2 Dataset Dashboard - Version - 0.4")),
+    dbc.CardHeader(html.H5("GNPS2 Dataset Dashboard - Version - 2025.05.23")),
     dbc.CardBody(
         [   
             dcc.Location(id='url', refresh=False),
