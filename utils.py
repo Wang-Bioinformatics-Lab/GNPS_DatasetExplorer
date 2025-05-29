@@ -4,6 +4,7 @@ import os
 
 import metabolights
 import zenodo
+import norman
 import workbench
 import pxd
 
@@ -51,6 +52,10 @@ def get_dataset_files(accession, metadata_source, dataset_password="", metadata_
         all_files = zenodo._get_zenodo_files(accession)
         files_df = pd.DataFrame()
         files_df["filename"] = all_files
+    
+    elif "NORMAN" in accession:
+        # This gets all the metadata as well
+        files_df = norman._get_norman_files(accession)
 
     elif len(accession) == 32:
         # We're likely looking at a uuid from GNPS, lets hit the API
@@ -87,6 +92,9 @@ def get_dataset_description(accession):
 
     if "ZENODO" in accession:
         dataset_title, dataset_description = zenodo._get_zenodo_dataset_information(accession)
+    
+    if "NORMAN" in accession:
+        dataset_title, dataset_description = norman._get_norman_dataset_information(accession)
 
     elif len(accession) == 32:
         # We're likely looking at a uuid from GNPS, lets hit the API

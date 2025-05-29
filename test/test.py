@@ -4,6 +4,7 @@ sys.path.insert(0, "..")
 import utils
 import metabolights
 import zenodo
+import norman
 
 def test_msv():
     #accession = "MSV000086206"
@@ -57,12 +58,27 @@ def test_gnps_fbmn():
 
     print(files_list)
 
+def test_norman():
+    import requests_cache
+    requests_cache.install_cache('demo_cache')
+
+    dataset = "NORMAN-27df0a3e-3578-4a30-b9e4-1505f9da010d"
+
+    description, title = norman._get_norman_dataset_information(dataset)
+    print(f"Dataset: {dataset}\nTitle: {title}\nDescription: {description}")
+    files = norman._get_norman_files(dataset)
+    print(f"Files for dataset {dataset}:")
+    print(files)
+    
+
+
 def main():
-    test_msv()
+    #test_msv()
     #test_msv_massive_metadata()
     #test_zenodo()
     #test_workbench()
     #test_mtbls()
+    test_norman()
 
 if __name__ == "__main__":
     main()

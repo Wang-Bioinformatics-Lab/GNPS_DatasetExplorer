@@ -74,7 +74,7 @@ NAVBAR = dbc.Navbar(
     
 
 DASHBOARD = [
-    dbc.CardHeader(html.H5("GNPS2 Dataset Dashboard - Version - 2025.05.23")),
+    dbc.CardHeader(html.H5("GNPS2 Dataset Dashboard - Version - 2025.05.29")),
     dbc.CardBody(
         [   
             dcc.Location(id='url', refresh=False),
@@ -266,6 +266,8 @@ DASHBOARD = [
             html.A("Zenodo Dataset", href="/ZENODO-8338511"),
             html.Br(),
             html.A("Zenodo Dataset (with Zip Files)", href="/ZENODO-4989929"),
+            html.Br(),
+            html.A("NORMAN Dataset", href="NORMAN-27df0a3e-3578-4a30-b9e4-1505f9da010d"),
         ]
     )
 ]
@@ -400,25 +402,36 @@ def _determine_usi_list(accession, file_table_data, selected_table_data, get_all
     if get_all is True:
         for i in range(len(file_table_data)):
             filename = file_table_data[i]["filename"]
-            if private:
-                usi = "mzspec:PRIVATE{}:{}".format(accession, filename)
-            else:
-                usi = "mzspec:{}:{}".format(accession, filename)
 
-            if len(accession) == 32:
-                usi = "mzspec:GNPS:TASK-{}-{}".format(accession, filename)
+            # first check if usi is in the dataframe
+            if "usi" in file_table_data[i]:
+                usi = file_table_data[i]["usi"]
+            else:
+                # try to construct it here
+                if private:
+                    usi = "mzspec:PRIVATE{}:{}".format(accession, filename)
+                else:
+                    usi = "mzspec:{}:{}".format(accession, filename)
+
+                if len(accession) == 32:
+                    usi = "mzspec:GNPS:TASK-{}-{}".format(accession, filename)
             
             usi_list.append(usi)
     else:
         for selected_index in selected_table_data:
-            filename = file_table_data[selected_index]["filename"]
-            if private:
-                usi = "mzspec:PRIVATE{}:{}".format(accession, filename)
+            # first check if usi is in the dataframe
+            if "usi" in file_table_data[selected_index]:
+                usi = file_table_data[selected_index]["usi"]
+            
             else:
-                usi = "mzspec:{}:{}".format(accession, filename)
+                filename = file_table_data[selected_index]["filename"]
+                if private:
+                    usi = "mzspec:PRIVATE{}:{}".format(accession, filename)
+                else:
+                    usi = "mzspec:{}:{}".format(accession, filename)
 
-            if len(accession) == 32:
-                usi = "mzspec:GNPS:TASK-{}-{}".format(accession, filename)
+                if len(accession) == 32:
+                    usi = "mzspec:GNPS:TASK-{}-{}".format(accession, filename)
             
             usi_list.append(usi)
 
